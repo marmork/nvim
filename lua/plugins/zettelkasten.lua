@@ -9,37 +9,66 @@ return {
         home = '/home/marcel/Dokumente/Schreiben/zettelkasten',
         bib_path = '/home/marcel/Dokumente/Schreiben/Bibliothek.bib',
         date_format = '%Y%m%d%H%M',
-        filename_template = '{{date}}-{{slug}}',
         template_new_note = '/home/marcel/.config/nvim/templates/zettel_template.md',
       })
+
+      -- Custom function to create a new Zettel with a slug and rendered template
+      local function create_new_zettel_with_slug()
+        -- Prompt the user for a title
+        local title = vim.fn.input('Enter title for your new Zettel: ')
+        if title == '' then return end
+
+        local date = os.date('%Y-%m-%d')
+        local slug = string.gsub(title, '[^%a%d]+', '-')
+        local filename = string.format("%s-%s.md", date, slug)
+        local filepath = vim.fn.expand('~/Dokumente/Schreiben/zettelkasten/' .. filename)
+
+        -- Get the content from the template file
+        local template_path = '/home/marcel/.config/nvim/templates/zettel_template.md'
+        local template_content = vim.fn.readfile(template_path)
+
+        -- Join the lines back into a single string for replacement
+        local content = table.concat(template_content, '\n')
+
+        -- Manually replace the placeholders
+        content = string.gsub(content, '{{title}}', title)
+        content = string.gsub(content, '{{date}}', date)
+
+        -- Write the modified content to the new file
+        vim.fn.writefile(vim.split(content, '\n'), filepath)
+
+        -- Open the new file buffer
+        vim.cmd('edit ' .. filepath)
+      end
+
+      -- The standard Telekasten keys are defined here, but with a custom function for new_note
+      vim.keymap.set('n', '<leader>zn', create_new_zettel_with_slug, { desc = "New Zettel with slug" })
+      vim.keymap.set('n', '<leader>zb', '<cmd>Telekasten show_backlinks<CR>', { desc = "Show Backlinks" })
+      vim.keymap.set('n', '<leader>zf', '<cmd>Telekasten find_notes<CR>', { desc = "Find Zettel" })
+      vim.keymap.set('n', '<leader>zl', '<cmd>Telekasten insert_link<CR>', { desc = "Insert Link" })
+      vim.keymap.set('n', '<leader>zo', '<cmd>Telekasten follow_link<CR>', { desc = "Open Link under cursor" })
+      vim.keymap.set('n', '<leader>zt', '<cmd>Telekasten today<CR>', { desc = "Daily Zettel" })
     end,
-    keys = {
-      {'<leader>zb', '<cmd>Telekasten show_backlinks<CR>', desc = "Show Backlinks"},
-      {'<leader>zf', '<cmd>Telekasten find_notes<CR>', desc = "Find Zettel"},
-      {'<leader>zl', '<cmd>Telekasten insert_link<CR>', desc = "Insert Link"},
-      {'<leader>zn', '<cmd>Telekasten new_note<CR>', desc = "New Zettel"},
-      {'<leader>zo', '<cmd>Telekasten follow_link<CR>', desc = "Open Link under cursor"},
-      {'<leader>zt', '<cmd>Telekasten today<CR>', desc = "Daily Zettel"},
-    }
   },
 
+  --- Telescope extension including Zotero picker
   {
     'jmbuhr/telescope-zotero.nvim',
     dependencies = { 'nvim-telescope/telescope.nvim', 'kkharji/sqlite.lua' },
     config = function()
-      -- Lade die Extension, ohne Fehler, falls sie schon geladen ist
+      -- Load telescope extension
       local ok_ext, tz = pcall(require, 'telescope')
       if ok_ext then
         pcall(function() tz.load_extension('zotero') end)
       end
 
-      -- Keymap, um den Picker zu öffnen
+      -- Keymap to open the Zotero picker
       vim.keymap.set('n', '<leader>zc', function()
         require('telescope').extensions.zotero.zotero({
           bib = "/home/marcel/Dokumente/Schreiben/Bibliothek.bib",
           attach_mappings = function(prompt_bufnr, map)
 
-            -- Eigentliche Funktion zum Einfügen
+            -- Core function to insert the citekey
             local actions = require('telescope.actions')
             local action_state = require('telescope.actions.state')
 
@@ -52,17 +81,17 @@ return {
 
               local cite = entry.value.citekey
 
-              -- Picker schließen
+              -- Close the picker
               actions.close(prompt_bufnr)
 
-              -- Einfügen an Cursor
+              -- Insert at the cursor position
               local row, col = unpack(vim.api.nvim_win_get_cursor(0))
               local inserted = "@" .. cite
               vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col, { inserted })
               vim.api.nvim_win_set_cursor(0, { row, col + #inserted })
             end
 
-            -- Mappe Enter im Picker
+            -- Map the enter key in the picker
             map('i', '<CR>', insert_citekey)
             map('n', '<CR>', insert_citekey)
 
@@ -72,30 +101,4 @@ return {
       end, { desc = "Zotero: insert cite key only" })
     end,
   },
-
-  -- Nvim-tree for file explorer
-  {
-    'nvim-tree/nvim-tree.lua',
-    cmd = 'NvimTreeToggle',
-    config = function()
-      require('nvim-tree').setup()
-    end
-  },
-
-  -- Gitsigns for git integration
-  {
-    'lewis6991/gitsigns.nvim',
-    config = function()
-      require('gitsigns').setup()
-    end
-  },
-
-  -- Neogit for Git
-  {
-    'git@github.com:NeogitOrg/neogit.git',
-    cmd = 'Neogit',
-    dependencies = 'plenary.nvim',
-    config = true
-  },
 }
-

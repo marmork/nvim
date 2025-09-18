@@ -18,3 +18,13 @@ vim.opt.mouse = 'a'
 vim.opt.expandtab = true
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
+
+-- Start Neovim in my writing folder
+vim.api.nvim_create_autocmd("VimEnter", {
+    callback = function()
+        if vim.fn.argc() == 0 then
+            vim.cmd('NvimTreeToggle ' .. vim.fn.expand('~/Dokumente/Schreiben/'))
+        end
+    end,
+    once = true
+})

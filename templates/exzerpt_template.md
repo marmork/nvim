@@ -1,9 +1,13 @@
 ---
 bibliography: [/home/marcel/Dokumente/Schreiben/Bibliothek.bib]
 ---
-# {{title}}
+Autor/in:  
+Titel:  
+Untertitel:  
+Jahr:  
+Citation Key:  
 - Datum: {{date}}
-## Tags
-#
 
-...
+
+
+# Literatur
