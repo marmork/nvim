@@ -12,6 +12,9 @@ return {
     'git@github.com:NeogitOrg/neogit.git',
     cmd = 'Neogit',
     dependencies = 'plenary.nvim',
-    config = true
+    config = true,
+    keys = {
+      { '<leader>gg', ':Neogit<CR>', desc = 'Neogit: open main status' },
+    },
   },
 }
