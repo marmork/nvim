@@ -6,8 +6,8 @@ Titel:
 Untertitel:  
 Jahr:  
 Citation Key:  
-- Datum: {{date}}
+Datum: {{date}}
 
-
+...
 
 # Literatur

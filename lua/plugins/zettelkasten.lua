@@ -10,6 +10,7 @@ return {
         bib_path = '/home/marcel/Dokumente/Schreiben/Bibliothek.bib',
         date_format = '%Y%m%d%H%M',
         template_new_note = '/home/marcel/.config/nvim/templates/zettel_template.md',
+        template_new_excerpt = '/home/marcel/.config/nvim/templates/excerpt_template.md',
       })
 
       -- Custom function to create a new Zettel with a slug and rendered template
@@ -18,9 +19,10 @@ return {
         local title = vim.fn.input('Enter title for your new Zettel: ')
         if title == '' then return end
 
-        local date = os.date('%Y-%m-%d')
+        local date_filename = os.date('%Y%m%d%H%M')
+        local date_template = os.date('%Y-%m-%d')
         local slug = string.gsub(title, '[^%a%d]+', '-')
-        local filename = string.format("%s-%s.md", date, slug)
+        local filename = string.format("%s-%s.md", date_filename, slug)
         local filepath = vim.fn.expand('~/Dokumente/Schreiben/zettelkasten/' .. filename)
 
         -- Get the content from the template file
@@ -32,7 +34,7 @@ return {
 
         -- Manually replace the placeholders
         content = string.gsub(content, '{{title}}', title)
-        content = string.gsub(content, '{{date}}', date)
+        content = string.gsub(content, '{{date}}', date_template)
 
         -- Write the modified content to the new file
         vim.fn.writefile(vim.split(content, '\n'), filepath)
@@ -41,8 +43,39 @@ return {
         vim.cmd('edit ' .. filepath)
       end
 
-      -- The standard Telekasten keys are defined here, but with a custom function for new_note
+      -- Custom function to create a new Excerpt with a slug
+      local function create_new_excerpt_with_slug()
+        -- Prompt the user for a title
+        local title = vim.fn.input('Enter title for your new Excerpt: ')
+        if title == '' then return end
+
+        local date_filename = os.date('%Y%m%d%H%M')
+        local date_template = os.date('%Y-%m-%d')
+        local slug = string.gsub(title, '[^%a%d]+', '-')
+        local filename = string.format("%s-%s.md", date_filename, slug)
+        local filepath = vim.fn.expand('~/Dokumente/Schreiben/zettelkasten/' .. filename)
+
+        -- Get the content from the template file
+        local template_path = '/home/marcel/.config/nvim/templates/exzerpt_template.md'
+        local template_content = vim.fn.readfile(template_path)
+        
+        -- Join the lines back into a single string for replacement
+        local content = table.concat(template_content, '\n')
+        
+        -- Manually replace the placeholders
+        content = string.gsub(content, '{{title}}', title)
+        content = string.gsub(content, '{{date}}', date_template)
+
+        -- Write the modified content to the new file
+        vim.fn.writefile(vim.split(content, '\n'), filepath)
+
+        -- Open the new file buffer
+        vim.cmd('edit ' .. filepath)
+      end
+
+      -- The standard Telekasten keys are defined here, with custom functions
       vim.keymap.set('n', '<leader>zn', create_new_zettel_with_slug, { desc = "New Zettel with slug" })
+      vim.keymap.set('n', '<leader>ze', create_new_excerpt_with_slug, { desc = "New Excerpt with slug" })
       vim.keymap.set('n', '<leader>zb', '<cmd>Telekasten show_backlinks<CR>', { desc = "Show Backlinks" })
       vim.keymap.set('n', '<leader>zf', '<cmd>Telekasten find_notes<CR>', { desc = "Find Zettel" })
       vim.keymap.set('n', '<leader>zl', '<cmd>Telekasten insert_link<CR>', { desc = "Insert Link" })
