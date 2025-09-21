@@ -1,12 +1,12 @@
 ---
 bibliography: [/home/marcel/Dokumente/Schreiben/Bibliothek.bib]
 ---
-Autor/in:  
-Titel:  
-Untertitel:  
-Jahr:  
-Citation Key:  
-Datum: {{date}}
+Autor/in: {{author}}  
+Titel: {{title}}  
+Untertitel: {{subtitle}}  
+Jahr: {{year}}  
+Citation Key: {{citekey}}  
+Datum: {{date}}  
 
 ...
 
