@@ -28,3 +28,15 @@ vim.api.nvim_create_autocmd("VimEnter", {
     end,
     once = true
 })
+
+-- === THEME SWITCHING ===
+-- Automatic theme switching based on system mode
+local function set_theme()
+  local is_dark = vim.fn.has('night_mode') == 1
+  if is_dark then
+    vim.cmd('colorscheme catppuccin-mocha')
+  else
+    vim.cmd('colorscheme catppuccin-latte')
+  end
+end
+set_theme()
