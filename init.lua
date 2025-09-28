@@ -29,7 +29,6 @@ vim.api.nvim_create_autocmd("VimEnter", {
     once = true
 })
 
--- === THEME SWITCHING ===
 -- Automatic theme switching based on system mode
 local function set_theme()
   local is_dark = vim.fn.has('night_mode') == 1
