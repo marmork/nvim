@@ -56,6 +56,7 @@ return {
       vim.keymap.set('n', '<leader>zf', '<cmd>Telekasten find_notes<CR>', { desc = "Find Zettel" })
       vim.keymap.set('n', '<leader>zl', '<cmd>Telekasten insert_link<CR>', { desc = "Insert Link" })
       vim.keymap.set('n', '<leader>zo', '<cmd>Telekasten follow_link<CR>', { desc = "Open Link under cursor" })
+      vim.keymap.set('n', '<leader>zs', '<cmd>Telekasten show_tags<CR>', { desc = "Show Tags" })
       vim.keymap.set('n', '<leader>zt', '<cmd>Telekasten today<CR>', { desc = "Daily Zettel" })
     end,
   },

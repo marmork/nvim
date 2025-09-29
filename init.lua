@@ -19,16 +19,6 @@ vim.opt.expandtab = true
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 
--- Start Neovim in my writing folder
-vim.api.nvim_create_autocmd("VimEnter", {
-    callback = function()
-        if vim.fn.argc() == 0 then
-            vim.cmd('NvimTreeToggle ' .. vim.fn.expand('~/Dokumente/Schreiben/'))
-        end
-    end,
-    once = true
-})
-
 -- Automatic theme switching based on system mode
 local function set_theme()
   local is_dark = vim.fn.has('night_mode') == 1
@@ -39,3 +29,29 @@ local function set_theme()
   end
 end
 set_theme()
+
+-- Start Neovim in my writing folder
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    if vim.fn.argc() == 0 then
+      if pcall(require, "nvim-tree") then
+          vim.cmd('NvimTreeToggle ' .. vim.fn.expand('~/Dokumente/Schreiben/'))
+      end
+    end
+  end,
+  once = true
+})
+vim.keymap.set('n', '<leader>n', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle File/Vault Tree' })
+
+local writing_path = vim.fn.expand('~/Dokumente/Schreiben')
+local coding_path = vim.fn.expand('~/repos')
+
+vim.keymap.set('n', '<leader>ws', function()
+  vim.cmd('cd ' .. writing_path)
+  vim.cmd('NvimTreeToggle' .. writing_path)
+end, { desc = 'Schreiben' })
+
+vim.keymap.set('n', '<leader>wc', function()
+  vim.cmd('cd ' .. coding_path)
+  vim.cmd('NvimTreeToggle' .. coding_path)
+end, { desc = 'Programmieren' })
