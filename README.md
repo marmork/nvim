@@ -3,19 +3,23 @@
 This README would normally document whatever steps are necessary to get your application up and running.
 
 ### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+TBS
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+After having installed LaTeX (Texlive), Node.js and Python, execute the following commands before starting Neovim:  
+```
+sudo apt install python-is-python3
+sudo apt instlal python3-pip
+sudo apt install pipx
+pipx ensurepath
+pipx install black
+pipx install sqlfluff
+pipx install typst  
+sudo npm install -g prettier  
+sudo npm install -g eslint_d  
+sudo apt install shfmt shellcheck  
+```
 
 ### Contribution guidelines ###
 
