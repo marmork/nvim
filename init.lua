@@ -18,5 +18,6 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins")
 
 -- Lade eigene Module
-require("settings")
 require("keymaps")
+require("settings")
+require("workspaces")
