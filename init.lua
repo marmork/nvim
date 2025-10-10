@@ -1,5 +1,3 @@
--- ~/.config/nvim/init.lua
-
 -- Leader Key
 vim.g.mapleader = " "
 
@@ -14,10 +12,10 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Lade Plugins aus dem 'plugins'-Verzeichnis
+-- Load plugins
 require("lazy").setup("plugins")
 
--- Lade eigene Module
+-- Load configuration modules
 require("config.keymaps")
 require("config.settings")
 require("config.workspaces")
