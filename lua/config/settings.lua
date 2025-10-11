@@ -1,4 +1,3 @@
--- ~/.config/nvim/lua/settings.lua
 -- General Neovim options
 
 vim.opt.number = true
