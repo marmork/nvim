@@ -57,6 +57,7 @@ pipx install typst
 
 # Node-based tools
 sudo npm install -g prettier eslint_d
+sudo npm install -g tree-sitter-cli
 ```
 
 ## 🚀 Installation
