@@ -1,20 +1,24 @@
--- lua/plugins/git.lua
 return {
-  -- Gitsigns for git integration
   {
-    'lewis6991/gitsigns.nvim',
+    "lewis6991/gitsigns.nvim",
     config = function()
-      require('gitsigns').setup()
-    end
+      local ok, gitsigns = pcall(require, "gitsigns")
+      if not ok then return end
+      gitsigns.setup({
+        signs = {
+          add = { text = "+" },
+          change = { text = "~" },
+          delete = { text = "_" },
+          topdelete = { text = "‾" },
+          changedelete = { text = "~" },
+        },
+      })
+    end,
   },
-  -- Neogit for Git
+
   {
-    'git@github.com:NeogitOrg/neogit.git',
-    cmd = 'Neogit',
-    dependencies = 'plenary.nvim',
-    config = true,
-    keys = {
-      { '<leader>gg', ':Neogit<CR>', desc = 'Neogit: open main status' },
-    },
+    "NeogitOrg/neogit",
+    cmd = "Neogit",
+    dependencies = { "nvim-lua/plenary.nvim" },
   },
 }

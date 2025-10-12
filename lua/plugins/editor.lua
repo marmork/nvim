@@ -1,46 +1,67 @@
--- lua/plugins/editor.lua
 return {
-  -- Nvim-tree for file explorer
+  -- web icons
+  { "nvim-tree/nvim-web-devicons", lazy = true },
+
+  -- nvim-tree
   {
-    'nvim-tree/nvim-tree.lua',
+    "nvim-tree/nvim-tree.lua",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
-      local api = require('nvim-tree.api')
-      local on_attach = function(bufnr)
-        vim.keymap.set('n', '<CR>', api.node.open.edit, { desc = "Open file in NvimTree", buffer = bufnr })
-        vim.keymap.set('n', 'o', api.node.open.edit, { desc = "Open file in NvimTree", buffer = bufnr })
-        vim.keymap.set('n', '<C-t>', api.node.open.tab, { desc = "Open in new tab", buffer = bufnr })
-        vim.keymap.set('n', '<C-x>', api.node.open.horizontal, { desc = "Open in horizontal split", buffer = bufnr })
-        vim.keymap.set('n', '<C-v>', api.node.open.vertical, { desc = "Open in vertical split", buffer = bufnr })
-        vim.keymap.set('n', '<2-LeftMouse>', api.tree.open, { desc = "Toggle folder", buffer = bufnr })
-        vim.keymap.set('n', '/', api.tree.find_file, { desc = "Find file", buffer = bufnr })
-      end
-
-      require('nvim-tree').setup({
-        actions = {
-          open_file = {
-            quit_on_open = true,
-            resize_window = true,
-          },
-        },
-        on_attach = on_attach,
+      require("nvim-tree").setup({
+        on_attach = function() end, -- no keymaps here
+        actions = { open_file = { quit_on_open = true, resize_window = true } },
+        renderer = { highlight_git = true },
       })
+    end,
+  },
 
-      -- Visual selection with Shift+Arrow
-      vim.keymap.set({'n', 'v'}, '<S-Up>', 'v<Up>', { noremap = true, silent = true })
-      vim.keymap.set({'n', 'v'}, '<S-Down>', 'v<Down>', { noremap = true, silent = true })
-      vim.keymap.set({'n', 'v'}, '<S-Left>', 'v<Left>', { noremap = true, silent = true })
-      vim.keymap.set({'n', 'v'}, '<S-Right>', 'v<Right>', { noremap = true, silent = true })
+  -- treesitter
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = { "bash", "python", "javascript", "typescript", "lua", "markdown", "sql", "latex" },
+        highlight = { enable = true },
+        indent = { enable = true },
+      })
+    end,
+  },
 
-      -- Move selected lines up/down
-      vim.keymap.set('v', '<A-Down>', ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
-      vim.keymap.set('v', '<A-Up>',   ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
+  -- completion ecosystem (plugins only; actual cmp.setup in keymaps.lua)
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
+      "saadparwaiz1/cmp_luasnip",
+      "L3MON4D3/LuaSnip",
+      "rafamadriz/friendly-snippets",
+    },
+  },
 
-      -- Copy/Cut/Paste with system clipboard
-      vim.keymap.set('v', '<C-c>', '"+y', { noremap = true, silent = true })
-      vim.keymap.set('v', '<C-x>', '"+d', { noremap = true, silent = true })
-      vim.keymap.set('n', '<C-v>', '"+P', { noremap = true, silent = true })
-      vim.keymap.set('v', '<C-v>', '"+P', { noremap = true, silent = true })
+  -- autopairs
+  {
+    "windwp/nvim-autopairs",
+    config = function()
+      local ok, autopairs = pcall(require, "nvim-autopairs")
+      if not ok then return end
+      autopairs.setup({})
+      local ok_cmp_autopairs, cmp_autopairs = pcall(require, "nvim-autopairs.completion.cmp")
+      if ok_cmp_autopairs then
+        local ok_cmp, cmp = pcall(require, "cmp")
+        if ok_cmp and cmp then cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({})) end
+      end
+    end,
+  },
 
-    end
+  -- comment
+  {
+    "numToStr/Comment.nvim",
+    config = function()
+      local ok, c = pcall(require, "Comment")
+      if ok then c.setup() end
+    end,
   },
 }
