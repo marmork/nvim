@@ -1,26 +1,73 @@
--- ~/.config/nvim/lua/keymaps.lua
--- central keymaps
+-- ~/.config/nvim/lua/config/keymaps.lua
+-- Central keymaps configuration
 
 local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- file tree toggle
+---------------------------------------------------------------------
+-- File tree toggle
+---------------------------------------------------------------------
 map("n", "<leader>n", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle File Tree" })
 
--- workspaces
-local ws_ok, ws = pcall(require, "workspaces")
-if ws_ok and ws then
+-- Ensure Enter opens files inside NvimTree
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "NvimTree",
+  callback = function()
+    local api = require("nvim-tree.api")
+    vim.keymap.set("n", "<CR>", api.node.open.edit, { buffer = true, desc = "NvimTree: Open file or folder" })
+  end,
+})
+
+---------------------------------------------------------------------
+-- Workspaces
+---------------------------------------------------------------------
+local ok_ws, ws = pcall(require, "config.workspaces")
+if ok_ws and ws then
   map("n", "<leader>ws", function() ws.switch("writing") end, { desc = "Schreibmodus" })
   map("n", "<leader>wc", function() ws.switch("coding") end,  { desc = "Codemodus" })
-else
-  -- fallback: notify if module missing
-  map("n", "<leader>ws", function() vim.notify("workspace module missing", vim.log.levels.WARN) end, opts)
-  map("n", "<leader>wc", function() vim.notify("workspace module missing", vim.log.levels.WARN) end, opts)
 end
 
--- zettelkasten keymaps (use utils/zettelkasten functions; safe require)
+---------------------------------------------------------------------
+-- Editor convenience (visual selection, move lines, clipboard)
+---------------------------------------------------------------------
+map({ "n", "v" }, "<S-Up>", "v<Up>", { desc = "Visual select up" })
+map({ "n", "v" }, "<S-Down>", "v<Down>", { desc = "Visual select down" })
+map({ "n", "v" }, "<S-Left>", "v<Left>", { desc = "Visual select left" })
+map({ "n", "v" }, "<S-Right>", "v<Right>", { desc = "Visual select right" })
+map("v", "<A-Down>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+map("v", "<A-Up>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+map("v", "<C-c>", '"+y', { desc = "Copy to system clipboard" })
+map("v", "<C-x>", '"+d', { desc = "Cut to system clipboard" })
+map("n", "<C-v>", '"+P', { desc = "Paste from system clipboard" })
+map("v", "<C-v>", '"+P', { desc = "Paste from system clipboard" })
+
+---------------------------------------------------------------------
+-- Git integrations
+---------------------------------------------------------------------
+map("n", "<leader>gg", "<cmd>Neogit<CR>", { desc = "Neogit: open status" })
+
+map("n", "<leader>hs", function()
+  local ok, gs = pcall(require, "gitsigns")
+  if ok and gs then gs.stage_hunk() else vim.notify("gitsigns not available", vim.log.levels.WARN) end
+end, { desc = "Gitsigns: stage hunk" })
+
+map("n", "<leader>hr", function()
+  local ok, gs = pcall(require, "gitsigns")
+  if ok and gs then gs.reset_hunk() else vim.notify("gitsigns not available", vim.log.levels.WARN) end
+end, { desc = "Gitsigns: reset hunk" })
+
+map("n", "<leader>hb", function()
+  local ok, gs = pcall(require, "gitsigns")
+  if ok and gs then gs.toggle_current_line_blame() else vim.notify("gitsigns not available", vim.log.levels.WARN) end
+end, { desc = "Gitsigns: toggle blame" })
+
+---------------------------------------------------------------------
+-- Zettelkasten (Telekasten + Zotero utils)
+---------------------------------------------------------------------
 local ok_zk, ztk = pcall(require, "utils.zettelkasten")
 if ok_zk and ztk then
+  map("n", "<leader>zc", ztk.open_zotero_insert_cite, { desc = "Zotero: insert cite key" })
+  map("n", "<leader>ze", ztk.open_zotero_create_excerpt, { desc = "Zotero: create excerpt" })
   map("n", "<leader>zn", ztk.create_new_zettel_with_slug, { desc = "New Zettel with slug" })
   map("n", "<leader>zb", "<cmd>Telekasten show_backlinks<CR>", { desc = "Show Backlinks" })
   map("n", "<leader>zf", "<cmd>Telekasten find_notes<CR>", { desc = "Find Zettel" })
@@ -28,9 +75,65 @@ if ok_zk and ztk then
   map("n", "<leader>zo", "<cmd>Telekasten follow_link<CR>", { desc = "Open Link under cursor" })
   map("n", "<leader>zs", "<cmd>Telekasten show_tags<CR>", { desc = "Show Tags" })
   map("n", "<leader>zt", "<cmd>Telekasten today<CR>", { desc = "Daily Zettel" })
-  map("n", "<leader>zc", ztk.open_zotero_insert_cite, { desc = "Zotero: insert cite key" })
-  map("n", "<leader>ze", ztk.open_zotero_create_excerpt, { desc = "Zotero: create excerpt" })
-else
-  -- graceful fallback if utils missing
-  map("n", "<leader>zn", function() vim.notify("zettelkasten utils missing", vim.log.levels.WARN) end, opts)
 end
+
+---------------------------------------------------------------------
+-- Completion (cmp centralized)
+---------------------------------------------------------------------
+local ok_cmp, cmp = pcall(require, "cmp")
+if ok_cmp and cmp then
+  local ok_luasnip, luasnip = pcall(require, "luasnip")
+  if ok_luasnip then require("luasnip.loaders.from_vscode").lazy_load() end
+
+  local select_opts = { behavior = cmp.SelectBehavior.Select }
+
+  cmp.setup({
+    snippet = { expand = function(args) if ok_luasnip then luasnip.lsp_expand(args.body) end end },
+    mapping = {
+      ["<C-Space>"] = cmp.mapping.complete(),
+      ["<CR>"] = cmp.mapping.confirm({ select = true }),
+      ["<Tab>"] = cmp.mapping(function(fallback)
+        if cmp.visible() then
+          cmp.select_next_item(select_opts)
+        elseif ok_luasnip and luasnip.expand_or_jumpable() then
+          luasnip.expand_or_jump()
+        else
+          fallback()
+        end
+      end, { "i", "s" }),
+      ["<S-Tab>"] = cmp.mapping(function(fallback)
+        if cmp.visible() then
+          cmp.select_prev_item(select_opts)
+        elseif ok_luasnip and luasnip.jumpable(-1) then
+          luasnip.jump(-1)
+        else
+          fallback()
+        end
+      end, { "i", "s" }),
+    },
+    sources = cmp.config.sources({
+      { name = "nvim_lsp" },
+      { name = "luasnip" },
+      { name = "buffer" },
+      { name = "path" },
+    }),
+  })
+end
+
+---------------------------------------------------------------------
+-- LSP buffer-local mappings
+---------------------------------------------------------------------
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local bufnr = args.buf
+    local function bufmap(mode, lhs, rhs, desc)
+      vim.keymap.set(mode, lhs, rhs, { noremap = true, silent = true, buffer = bufnr, desc = desc })
+    end
+    bufmap("n", "gd", vim.lsp.buf.definition, "LSP: goto def")
+    bufmap("n", "K", vim.lsp.buf.hover, "LSP: hover")
+    bufmap("n", "<leader>rn", vim.lsp.buf.rename, "LSP: rename")
+    bufmap("n", "<leader>ca", vim.lsp.buf.code_action, "LSP: code action")
+    bufmap("n", "gr", vim.lsp.buf.references, "LSP: references")
+    bufmap("n", "<leader>f", function() vim.lsp.buf.format({ bufnr = bufnr }) end, "LSP: format")
+  end,
+})
