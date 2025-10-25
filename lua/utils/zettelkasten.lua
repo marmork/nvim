@@ -173,7 +173,6 @@ function M.open_zotero_create_excerpt()
         local citekey = entry.value.citekey
         local title = entry.value.title or ""
         
-        -- *** FINAL FIX: Comprehensive Check for Zotero Author Fields (creators/creator/author) ***
         local author_data = entry.value.creators or entry.value.creator or entry.value.author
         local authors = format_authors(author_data) 
         
