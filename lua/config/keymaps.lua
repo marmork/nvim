@@ -8,6 +8,8 @@ local ok_util, util_editor = pcall(require, "utils.editor")
 ---------------------------------------------------------------------
 -- File tree toggle
 ---------------------------------------------------------------------
+-- File tree toggle (for hidden files)
+map("n", "<leader>h", "<cmd>lua require('nvim-tree.api').tree.toggle_hidden_filter()<CR>", { desc = "Toggle NvimTree Hidden Files" })
 map("n", "<leader>n", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle File Tree" })
 
 -- Ensure Enter opens files inside NvimTree
