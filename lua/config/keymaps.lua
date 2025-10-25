@@ -3,6 +3,7 @@
 
 local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
+local ok_util, util_editor = pcall(require, "utils.editor")
 
 ---------------------------------------------------------------------
 -- File tree toggle
@@ -30,16 +31,33 @@ end
 ---------------------------------------------------------------------
 -- Editor convenience (visual selection, move lines, clipboard)
 ---------------------------------------------------------------------
+-- 1. Visual selection (Shift + Arrows)
 map({ "n", "v" }, "<S-Up>", "v<Up>", { desc = "Visual select up" })
 map({ "n", "v" }, "<S-Down>", "v<Down>", { desc = "Visual select down" })
 map({ "n", "v" }, "<S-Left>", "v<Left>", { desc = "Visual select left" })
 map({ "n", "v" }, "<S-Right>", "v<Right>", { desc = "Visual select right" })
+
+-- 2. Line Moving (Alt + Up/Down)
+-- Uses the exported function from the utils/editor module
+map("n", "<A-Down>", function() util_editor.move_line("down") end, { desc = "Move line down (continuous)" })
+map("n", "<A-Up>", function() util_editor.move_line("up") end, { desc = "Move line up (continuous)" })
+
+-- Move selection in visual mode (remains as VIM command)
 map("v", "<A-Down>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
 map("v", "<A-Up>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+
+-- 3. Clipboard shortcuts (Ctrl + C/X/V)
+-- Copy (visual mode)
 map("v", "<C-c>", '"+y', { desc = "Copy to system clipboard" })
+-- Cut (visual mode)
 map("v", "<C-x>", '"+d', { desc = "Cut to system clipboard" })
+-- Paste (normal & visual Mode)
 map("n", "<C-v>", '"+P', { desc = "Paste from system clipboard" })
 map("v", "<C-v>", '"+P', { desc = "Paste from system clipboard" })
+
+-- 4. Select All (Ctrl + A)
+-- Select all the contents of a file
+map("n", "<C-a>", "ggvG", { desc = "Select all (ggvG)" })
 
 ---------------------------------------------------------------------
 -- Git integrations
