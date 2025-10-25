@@ -156,7 +156,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
       vim.keymap.set(mode, lhs, rhs, { noremap = true, silent = true, buffer = bufnr, desc = desc })
     end
     
-    -- LSP Mappings (ungesichert, da sie den Fehler nicht verursacht haben)
     bufmap("n", "gd", vim.lsp.buf.definition, "LSP: goto def")
     bufmap("n", "K", vim.lsp.buf.hover, "LSP: hover")
     bufmap("n", "gr", vim.lsp.buf.references, "LSP: references")
