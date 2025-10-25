@@ -14,7 +14,8 @@ M.paths = {
 
 M.paths.zettel_template  = M.paths.templates .. '/zettel_template.md'
 M.paths.exzerpt_template = M.paths.templates .. '/exzerpt_template.md'
-M.paths.bib              = M.paths.home .. '/Bibliothek.bib'
+-- IMPORTANT: Using CSL JSON for the cleanest format.
+M.paths.bib              = M.paths.home .. '/Bibliothek.json'
 
 ------------------------------------------------------------
 -- ⚙️ Setup
@@ -62,7 +63,7 @@ function M.create_new_zettel_with_slug()
 end
 
 ------------------------------------------------------------
--- 📚 Zotero
+-- 📚 Zotero - Insert Cite
 ------------------------------------------------------------
 function M.open_zotero_insert_cite()
   local ok, telescope = pcall(require, "telescope")
@@ -94,11 +95,65 @@ function M.open_zotero_insert_cite()
   })
 end
 
+------------------------------------------------------------
+-- 📚 Zotero - Create Excerpt
+------------------------------------------------------------
 function M.open_zotero_create_excerpt()
   local ok, telescope = pcall(require, "telescope")
   if not ok or not telescope.extensions.zotero then
     vim.notify("telescope-zotero not available", vim.log.levels.WARN)
     return
+  end
+  
+  -- Utility function: Converts the creator table to a formatted string
+  local function format_authors(creator_table)
+    -- Check 1: Initial validation of the array itself.
+    if not creator_table or type(creator_table) ~= 'table' or #creator_table == 0 then
+      return "Unknown Author(s)"
+    end
+    
+    local names = {}
+    
+    -- Iterate over the creator objects.
+    for _, creator in ipairs(creator_table) do
+      
+      -- CRITICAL CHECK: Filter out non-author roles (editor, translator, etc.)
+      if creator.creatorType and creator.creatorType ~= "author" then
+          -- Skip non-author entries
+          goto continue
+      end
+      
+      -- Priority 1: Check for the diagnosed Zotero fields: lastName and firstName.
+      if creator.lastName and creator.firstName then
+        -- Format as "LastName, F."
+        local last_name = creator.lastName or ""
+        local first_initial = (creator.firstName and creator.firstName:sub(1, 1) .. ".") or ""
+        
+        if #last_name > 0 then
+          table.insert(names, last_name .. ", " .. first_initial)
+        end
+        
+      -- Priority 2: Fallback for standard CSL fields (family/given).
+      elseif creator.family and creator.given then
+        local family_name = creator.family or ""
+        local given_initial = (creator.given and creator.given:sub(1, 1) .. ".") or ""
+        if #family_name > 0 then
+          table.insert(names, family_name .. ", " .. given_initial)
+        end
+        
+      -- Priority 3: Fallback for corporate/literal names (raw string).
+      elseif creator.literal and #creator.literal > 0 then
+        table.insert(names, creator.literal)
+      end
+      
+      ::continue:: -- Continue loop iteration
+    end
+    
+    if #names > 0 then
+      return table.concat(names, " and ")
+    else
+      return "Unknown Author(s) (no author type found)"
+    end
   end
 
   telescope.extensions.zotero.zotero({
@@ -117,11 +172,27 @@ function M.open_zotero_create_excerpt()
 
         local citekey = entry.value.citekey
         local title = entry.value.title or ""
-        local authors = entry.value.author or ""
+        
+        -- *** FINAL FIX: Comprehensive Check for Zotero Author Fields (creators/creator/author) ***
+        local author_data = entry.value.creators or entry.value.creator or entry.value.author
+        local authors = format_authors(author_data) 
+        
         local year = entry.value.year or ""
         local subtitle = entry.value.subtitle or ""
-        local filepath = M.paths.exzerpte .. "/" .. citekey .. ".md"
+        
+        -- PROMPT for custom title (filename suffix)
+        local file_title = vim.fn.input("Enter Excerpt Title (for filename suffix): ")
+        if file_title == "" then 
+          vim.notify("Excerpt creation aborted. Title required.", vim.log.levels.WARN)
+          return 
+        end
+        
+        -- Filename logic: Keeps capitalization and uses underscores
+        local slug = file_title:gsub("[^%w]+", "_")
+        local filename = string.format("%s_%s.md", citekey, slug)
+        local filepath = M.paths.exzerpte .. "/" .. filename
 
+        -- File existence check and creation logic
         if vim.loop.fs_stat(filepath) then
           vim.notify("Excerpt exists — opening file.", vim.log.levels.INFO)
           vim.cmd.edit(filepath)
@@ -134,7 +205,7 @@ function M.open_zotero_create_excerpt()
 
         local date = os.date("%Y-%m-%d")
         content = content
-          :gsub("{{author}}", authors)
+          :gsub("{{author}}", authors) -- Substitutes the formatted author string
           :gsub("{{title}}", title)
           :gsub("{{subtitle}}", subtitle)
           :gsub("{{year}}", year)

@@ -1,7 +1,7 @@
 ---
-bibliography: [/home/marcel/Dokumente/Schreiben/Bibliothek.bib]
+bibliography: [/home/marcel/Dokumente/Schreiben/Bibliothek.json]
 ---
-Autor/in: {{authors}}  
+Autor/in: {{author}}  
 Titel: {{title}}  
 Untertitel: {{subtitle}}  
 Jahr: {{year}}  
