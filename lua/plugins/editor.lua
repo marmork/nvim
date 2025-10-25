@@ -12,6 +12,24 @@ return {
         actions = { open_file = { quit_on_open = true, resize_window = true } },
         renderer = { highlight_git = true },
       })
+
+      -- Adding the autocommand to automatically update nvim-tree when cd
+      vim.api.nvim_create_autocmd("DirChanged", {
+        callback = function()
+          -- 1. Load the nvim-tree View API to check the status
+          local view_api = require("nvim-tree.view")
+          
+          -- Ensure that nvim-tree is open (visible)
+          if view_api.is_visible() then
+            -- 2. Load nvim-tree main API
+            local nt_api = require("nvim-tree.api")
+            
+            -- Reload the tree and set the root to the new current directory
+            nt_api.tree.change_root(vim.fn.getcwd())
+          end
+        end,
+        group = vim.api.nvim_create_augroup("NvimTreeCdUpdate", { clear = true }),
+      })
     end,
   },
 
