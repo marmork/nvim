@@ -1,12 +1,10 @@
 # 🧠 Neovim Configuration – Writing & Coding Setup
-
 This repository contains my personal **Neovim configuration** for both **writing** and **software development**.  
-It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and follows a clean modular structure for maintainability.
+It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and follows a modular structure for maintainability.
 
 ---
 
 ## ⚙️ Features
-
 ✅ Two dedicated work modes:
 - **Writing Mode** (`<leader>ws`) → switches to `~/Documents/Writing`
 - **Coding Mode** (`<leader>wc`) → switches to `~/repos`
@@ -15,26 +13,31 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 - Modern UI (Catppuccin theme, nvim-tree, Telescope)
 - Built-in LSP, linting, and formatting (via `none-ls.nvim`)
 - Automatic formatting on save
-- Lightweight modular structure for readability and control
 
 ---
 
 ## 🧩 Folder Structure
-
+```
 ~/.config/nvim/
 ├── init.lua → Entry point (loads Lazy and your modules)
 ├── lua/
-│ ├── settings.lua → Neovim options (tabs, numbers, etc.)
-│ ├── keymaps.lua → Centralized keybindings
-│ ├── workspaces.lua → Writing/Coding mode switching logic
-│ ├── plugins/ → One file per plugin definition
-│ └── utils/ → (optional) custom helpers or shared functions
+|    ├──config/
+│         ├── keymaps.lua → Centralized keybindings
+|         ├── settings.lua → Neovim options (tabs, numbers, etc.)
+│         ├── workspaces.lua → Writing/Coding mode switching logic
+|    ├──plugins/ → One file per plugin definition
+|         ├── editor.lua
+|         ├── git.lua
+|         ├── linting.lua
+|         ├── lsp.lua
+|         ├── theme.lua
+|         ├── zettelkasten.lua
+│    └── utils/ → (optional) custom helpers or shared functions
 └── lazy-lock.json → Version lock for all plugins (auto-generated)  
-
+```
 ---
 
 ## 🧰 Prerequisites (Debian/Ubuntu)
-
 Install the base tools and dependencies:
 
 ```bash
@@ -61,7 +64,6 @@ sudo npm install -g tree-sitter-cli
 ```
 
 ## 🚀 Installation
-
 Clone this repository into your Neovim configuration directory and start Neovim (it will automatically install all plugins via lazy.nvim)::  
 ```bash
 git clone https://github.com/<your-username>/nvim-config.git ~/.config/nvim
@@ -82,7 +84,6 @@ nvim
 - Update plugins: `:Lazy update`  
 
 ## 🔄 Updating Your Setup
-
 To keep everything up to date:  
 ```bash
 cd ~/.config/nvim
@@ -98,14 +99,12 @@ nvim
 ```
 
 ## 🔧 Tips
-
 1. Add new plugins under `lua/plugins/ `as separate files.  
 2. Centralize global mappings in `lua/keymaps.lua`.  
 3. If you create helpers (e.g., auto commands or formatters), put them in `lua/utils/`.  
 4. Use Git branches for larger config changes, e.g. `git checkout -b refactor/lsp-setup`  
 
 ## 🧑‍💻 Developer Notes
-
 To debug or reset your Neovim environment:  
 ```bash
 rm -rf ~/.local/share/nvim
@@ -115,5 +114,4 @@ nvim
 This will rebuild the Lazy environment from scratch.  
 
 ## 👤 Author
-
 Marcel
