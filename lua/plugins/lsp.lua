@@ -1,7 +1,6 @@
 -- ~/.config/nvim/lua/plugins/lsp.lua
 -- ✅ Neovim 0.11+ (vim.lsp.config API)
--- ✅ Keine deprecated Frameworks
--- ✅ Mason + lazy LSP + nvim-cmp Integration
+-- ✅ Mason + lazy LSP + nvim-cmp integration
 
 return {
   -- 1. Mason Core
@@ -100,8 +99,6 @@ return {
           })
         end,
       })
-
-      vim.notify("✅ LSP ready (vim.lsp.config based)", vim.log.levels.INFO)
     end,
   },
 
