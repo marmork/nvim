@@ -29,6 +29,14 @@ if ok_ws and ws then
 end
 
 ---------------------------------------------------------------------
+-- Buffer Navigation
+---------------------------------------------------------------------
+-- Use <leader>y (previous) and <leader>x (next) for quick buffer switching.
+map("n", "<leader>y", "<cmd>bprevious<CR>", { desc = "Buffer Previous (<leader>y)" })
+map("n", "<leader>x", "<cmd>bnext<CR>", { desc = "Buffer Next (<leader>x)" })
+map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Buffer Close (<leader>bd)" })
+
+---------------------------------------------------------------------
 -- Editor convenience (visual selection, move lines, clipboard)
 ---------------------------------------------------------------------
 -- 1. Visual selection (Shift + Arrows)
