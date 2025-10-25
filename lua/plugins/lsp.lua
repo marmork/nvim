@@ -50,15 +50,6 @@ return {
       local lsp = vim.lsp
       local cmp_capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      local function on_attach(_, bufnr)
-        local opts = { buffer = bufnr, noremap = true, silent = true }
-        vim.keymap.set("n", "gd", lsp.buf.definition, opts)
-        vim.keymap.set("n", "K", lsp.buf.hover, opts)
-        vim.keymap.set("n", "gr", lsp.buf.references, opts)
-        vim.keymap.set("n", "<leader>rn", lsp.buf.rename, opts)
-        vim.keymap.set("n", "<leader>ca", lsp.buf.code_action, opts)
-      end
-
       -- Mapping FileType -> LSP server name
       local ft_servers = {
         python = "pyright",
@@ -92,7 +83,6 @@ return {
           vim.lsp.start({
             name = server_name,
             capabilities = cmp_capabilities,
-            on_attach = on_attach,
             cmd = server_config.cmd, -- Mason-registered binary
             root_dir = server_config.root_dir or vim.fn.getcwd(),
             filetypes = { ft },
