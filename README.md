@@ -55,6 +55,7 @@ pipx ensurepath
 
 # Python-based tools
 pipx install black
+pipx install pynvim
 pipx install sqlfluff
 pipx install typst
 
