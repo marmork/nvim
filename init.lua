@@ -12,6 +12,14 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Enable soft wrap only for specific file types (Markdown, TeX, Typst, Text)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "markdown", "tex", "typst", "text" },
+  callback = function()
+    vim.opt_local.wrap = true
+  end,
+})
+
 -- Load plugins
 require("lazy").setup("plugins")
 
