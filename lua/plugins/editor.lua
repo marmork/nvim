@@ -1,6 +1,55 @@
 return {
-  -- web icons
-  { "nvim-tree/nvim-web-devicons", lazy = true },
+
+  -- Autopairs
+  {
+    "windwp/nvim-autopairs",
+    config = function()
+      local ok, autopairs = pcall(require, "nvim-autopairs")
+      if not ok then return end
+      autopairs.setup({})
+      local ok_cmp_autopairs, cmp_autopairs = pcall(require, "nvim-autopairs.completion.cmp")
+      if ok_cmp_autopairs then
+        local ok_cmp, cmp = pcall(require, "cmp")
+        if ok_cmp and cmp then cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({})) end
+      end
+    end,
+  },
+
+  -- Bufferline: displays all loaded buffers as tabs
+    {
+      'akinsho/bufferline.nvim',
+      dependencies = { 'nvim-tree/nvim-web-devicons' }, -- Für Icons
+      version = "*",
+      opts = {
+          options = {
+              -- Zeigt die Bufferline IMMER an (entspricht showtabline=2)
+              show_buffer_close_icons = false,
+              separator_style = 'thin', 
+          },
+      },
+    },
+
+  -- Comment
+  {
+    "numToStr/Comment.nvim",
+    config = function()
+      local ok, c = pcall(require, "Comment")
+      if ok then c.setup() end
+    end,
+  },
+
+  -- Completion ecosystem (plugins only; actual cmp.setup in keymaps.lua)
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
+      "saadparwaiz1/cmp_luasnip",
+      "L3MON4D3/LuaSnip",
+      "rafamadriz/friendly-snippets",
+    },
+  },
 
   -- nvim-tree
   {
@@ -58,40 +107,22 @@ return {
     end,
   },
 
-  -- completion ecosystem (plugins only; actual cmp.setup in keymaps.lua)
-  {
-    "hrsh7th/nvim-cmp",
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
-      "hrsh7th/cmp-path",
-      "saadparwaiz1/cmp_luasnip",
-      "L3MON4D3/LuaSnip",
-      "rafamadriz/friendly-snippets",
+  -- Web icons
+  { "nvim-tree/nvim-web-devicons", lazy = true },
+
+  -- Zen mode
+  { 
+    'folke/zen-mode.nvim',
+    opts = {
+        window = {
+            width = 80, 
+            height = 0.95,
+        },
+        plugins = {
+            options = { enabled = true }, 
+        },
     },
-  },
-
-  -- autopairs
-  {
-    "windwp/nvim-autopairs",
-    config = function()
-      local ok, autopairs = pcall(require, "nvim-autopairs")
-      if not ok then return end
-      autopairs.setup({})
-      local ok_cmp_autopairs, cmp_autopairs = pcall(require, "nvim-autopairs.completion.cmp")
-      if ok_cmp_autopairs then
-        local ok_cmp, cmp = pcall(require, "cmp")
-        if ok_cmp and cmp then cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({})) end
-      end
-    end,
-  },
-
-  -- comment
-  {
-    "numToStr/Comment.nvim",
-    config = function()
-      local ok, c = pcall(require, "Comment")
-      if ok then c.setup() end
-    end,
+    lazy = true,
+    cmd = "ZenMode",
   },
 }
