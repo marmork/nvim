@@ -16,52 +16,17 @@ map('n', 'G', 'G', { desc = "Go to last line (Native)" })
 -- Workspaces & Layout (Master Setup Function)
 ---------------------------------------------------------------------
 
--- Function to set up the ideal writing layout: Main Text (88 cols) | Preview Buffer
-local function setup_writing_layout()
-  -- 1. Close NvimTree if open.
-  vim.cmd("NvimTreeClose")
-  
-  -- 2. Open a vertical split and navigate to it (right window).
-  vim.cmd("vsplit")
-  
-  -- 3. The cursor is now in the new, right window (which holds the duplicated text).
-  -- We now create an empty buffer in the left window (which is the main window)
-  -- The cursor is currently right. We switch to the left.
-  vim.cmd("wincmd h") 
-  
-  -- 4. Open a *new, empty buffer* in the left window, replacing the main text Puffer.
-  -- This creates the placeholder left. The main text Puffer is now only visible right.
-  vim.cmd("enew | setlocal buftype=nofile nobuflisted nonumber")
-
-  -- 5. Now we have: [EMPTY PLACEHOLDER (left)] | [MAIN TEXT (right)]
-  -- We use 'wincmd x' (exchange windows) to swap their positions.
-  vim.cmd("wincmd x")
-  
-  -- 6. Now we have: [MAIN TEXT (left)] | [EMPTY PLACEHOLDER (right)]
-  -- Move the cursor back to the left (main text) window.
-  vim.cmd("wincmd h") 
-
-  -- 7. Resize the main file window (left split) to the optimal width (88 columns).
-  local target_width = 88 
-  vim.cmd("vertical resize " .. target_width)
-  
-  -- 8. Ensure the cursor is on the main file for immediate typing
-  vim.cmd("wincmd p")
-end
+map('n', '<leader>w', '<cmd>ZenMode<CR>', { desc = 'Toggle Zen Mode (Central Writing)' })
 
 local ok_ws, ws = pcall(require, "config.workspaces")
 if ok_ws and ws then
-  -- Use <leader>ws to set up the workspace and the custom layout
   map("n", "<leader>ws", function() 
     ws.switch("writing")
-    setup_writing_layout() -- Run the layout setup after switching workspace
-  end, { desc = "Writing Mode & Layout Setup" })
+    -- vim.cmd("ZenMode")
+  end, { desc = "Writing Mode" })
   
   map("n", "<leader>wc", function() ws.switch("coding") end, { desc = "Coding Mode" })
 end
-
--- Use <leader>w to quickly apply the layout setup without switching workspace
-map('n', '<leader>w', setup_writing_layout, { desc = 'Apply Optimal 88-col Layout' })
 
 ---------------------------------------------------------------------
 -- File tree toggle
