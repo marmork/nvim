@@ -43,7 +43,7 @@ Install the base tools and dependencies:
 ```bash
 sudo apt update
 sudo apt install -y \
-  neovim git curl \
+  curl git luarocks neovim \
   nodejs npm \
   python3 python3-pip python-is-python3 \
   pipx \
