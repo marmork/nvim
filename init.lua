@@ -15,32 +15,14 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 ------------------------------------------------------------
--- Luarocks support (after Lazy.nvim bootstrap)
+-- Safe LuaRocks integration
 ------------------------------------------------------------
--- Add LuaRocks paths so that `require` finds luarocks-installed modules
-local function add_luarocks()
-  local home = os.getenv("HOME")
-  local paths = {
-    home .. "/.luarocks/share/lua/5.1/?.lua",
-    home .. "/.luarocks/share/lua/5.1/?/init.lua"
-  }
-  local cpaths = {
-    home .. "/.luarocks/lib/lua/5.1/?.so"
-  }
+local luarocks_path = vim.fn.expand("~/.luarocks/share/lua/5.1/?.lua")
+local luarocks_cpath = vim.fn.expand("~/.luarocks/lib/lua/5.1/?.so")
 
-  for _, p in ipairs(paths) do
-    if not package.path:find(p, 1, true) then
-      package.path = package.path .. ";" .. p
-    end
-  end
-
-  for _, p in ipairs(cpaths) do
-    if not package.cpath:find(p, 1, true) then
-      package.cpath = package.cpath .. ";" .. p
-    end
-  end
-end
-add_luarocks()
+-- Append instead of prepend
+package.path = package.path .. ";" .. luarocks_path
+package.cpath = package.cpath .. ";" .. luarocks_cpath
 
 ------------------------------------------------------------
 -- Enable soft wrap only for specific file types
