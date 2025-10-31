@@ -43,6 +43,6 @@ require("lazy").setup("plugins")
 ------------------------------------------------------------
 -- Load configuration modules
 ------------------------------------------------------------
-require("config.keymaps")
 require("config.settings")
 require("config.workspaces")
+require("config.keymaps")
