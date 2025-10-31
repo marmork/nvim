@@ -120,12 +120,17 @@ if ok_zk and ztk then
   map("n", "<leader>zc", ztk.open_zotero_insert_cite, { desc = "Zotero: insert cite key" })
   map("n", "<leader>ze", ztk.open_zotero_create_excerpt, { desc = "Zotero: create excerpt" })
   map("n", "<leader>zn", ztk.create_new_zettel_with_slug, { desc = "New Zettel with slug" })
+end
+
+-- Telekasten commands
+local ok_tk, telekasten = pcall(require, "telekasten")
+if ok_tk and telekasten then
   map("n", "<leader>zb", "<cmd>Telekasten show_backlinks<CR>", { desc = "Show Backlinks" })
-  map("n", "<leader>zf", "<cmd>Telekasten find_notes<CR>", { desc = "Find Zettel" })
+  map("n", "<leader>zf", "<cmd>Telekasten find_notes<CR>",   { desc = "Find Zettel" })
   map("n", "<leader>zl", "<cmd>Telekasten insert_link<CR>", { desc = "Insert Link" })
   map("n", "<leader>zo", "<cmd>Telekasten follow_link<CR>", { desc = "Open Link under cursor" })
-  map("n", "<leader>zs", "<cmd>Telekasten show_tags<CR>", { desc = "Show Tags" })
-  map("n", "<leader>zt", "<cmd>Telekasten today<CR>", { desc = "Daily Zettel" })
+  map("n", "<leader>zs", "<cmd>Telekasten show_tags<CR>",   { desc = "Show Tags" })
+  map("n", "<leader>zt", "<cmd>Telekasten today<CR>",       { desc = "Daily Zettel" })
 end
 
 ---------------------------------------------------------------------
