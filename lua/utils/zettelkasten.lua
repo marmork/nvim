@@ -39,6 +39,15 @@ function M.setup_zotero()
   pcall(function() telescope.load_extension("zotero") end)
 end
 
+local function open_file(filepath)
+  local buf_exists = vim.fn.bufnr(filepath) ~= -1
+  if buf_exists then
+    vim.cmd("buffer " .. vim.fn.bufnr(filepath))
+  else
+    vim.cmd("edit " .. filepath)
+  end
+end
+
 ------------------------------------------------------------
 -- 🧠 Zettelkasten
 ------------------------------------------------------------
@@ -59,7 +68,7 @@ function M.create_new_zettel_with_slug()
 
   vim.fn.mkdir(M.paths.zettelkasten, "p")
   vim.fn.writefile(vim.split(content, "\n"), filepath)
-  vim.cmd.edit(filepath)
+  open_file(filepath)
 end
 
 ------------------------------------------------------------
@@ -194,7 +203,7 @@ function M.open_zotero_create_excerpt()
         -- File existence check and creation logic
         if vim.loop.fs_stat(filepath) then
           vim.notify("Excerpt exists — opening file.", vim.log.levels.INFO)
-          vim.cmd.edit(filepath)
+          open_file(filepath)
           return
         end
 
@@ -213,7 +222,7 @@ function M.open_zotero_create_excerpt()
 
         vim.fn.mkdir(M.paths.exzerpte, "p")
         vim.fn.writefile(vim.split(content, "\n"), filepath)
-        vim.cmd.edit(filepath)
+        open_file(filepath)
       end
 
       map("i", "<CR>", create_excerpt)

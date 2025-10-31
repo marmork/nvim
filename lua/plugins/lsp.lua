@@ -47,48 +47,30 @@ return {
     "neovim/nvim-lspconfig",
     lazy = false,
     config = function()
-      local lsp = vim.lsp
       local cmp_capabilities = require("cmp_nvim_lsp").default_capabilities()
+      local util = require("lspconfig.util")
 
-      -- Mapping FileType -> LSP server name
-      local ft_servers = {
-        python = "pyright",
-        typescript = "ts_ls",
-        javascript = "ts_ls",
-        bash = "bashls",
-        markdown = "marksman",
-        sql = "sqlls",
-        tex = "texlab",
-      }
+      -- Statische Server
+      local servers = { "pyright", "ts_ls", "bashls", "sqlls", "texlab" }
+      for _, name in ipairs(servers) do
+        vim.lsp.config(name, {
+          capabilities = cmp_capabilities,
+        })
+      end
 
-      -- Autostart servers lazily
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = vim.tbl_keys(ft_servers),
-        callback = function(args)
-          local ft = args.match
-          local server_name = ft_servers[ft]
-          if not server_name then return end
-
-          -- Check if already active
-          for _, client in ipairs(vim.lsp.get_clients({ bufnr = args.buf })) do
-            if client.name == server_name then return end
-          end
-
-          local server_config = vim.lsp.config[server_name]
-          if not server_config then
-            vim.notify("⚠️ No LSP config for " .. server_name, vim.log.levels.WARN)
-            return
-          end
-
-          vim.lsp.start({
-            name = server_name,
-            capabilities = cmp_capabilities,
-            cmd = server_config.cmd, -- Mason-registered binary
-            root_dir = server_config.root_dir or vim.fn.getcwd(),
-            filetypes = { ft },
-          })
+      -- Marksman (Markdown)
+      vim.lsp.config("marksman", {
+        cmd                 = { "marksman", "server" },
+        filetypes           = { "markdown" },
+        single_file_support = true,
+        capabilities        = cmp_capabilities,
+        root_dir = function(fname)
+          return util.find_git_ancestor(fname)
         end,
       })
+
+      -- Aktivierung
+      vim.lsp.enable({ "pyright", "ts_ls", "bashls", "sqlls", "texlab", "marksman" })
     end,
   },
 
