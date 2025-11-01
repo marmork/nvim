@@ -134,6 +134,21 @@ if ok_tk and telekasten then
 end
 
 ---------------------------------------------------------------------
+-- Pandoc/LaTeX Build Mappings (Filetype-specific)
+---------------------------------------------------------------------
+local ok_pdc, pandoc = pcall(require, "utils.pandoc")
+
+if ok_pdc and pandoc then
+    vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "tex", "markdown", "pandoc" },
+        callback = function(args)
+            -- ... (rest of the Autocommand logic)
+            -- Mappings: <leader>b for Build, <leader>v for View
+        end,
+    })
+end
+
+---------------------------------------------------------------------
 -- Completion (cmp centralized)
 ---------------------------------------------------------------------
 local ok_cmp, cmp = pcall(require, "cmp")
