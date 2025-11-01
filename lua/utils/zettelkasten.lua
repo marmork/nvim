@@ -42,9 +42,9 @@ end
 local function open_file(filepath)
   local buf_exists = vim.fn.bufnr(filepath) ~= -1
   if buf_exists then
-    vim.cmd("buffer " .. vim.fn.bufnr(filepath))
+    vim.api.nvim_set_current_buf(bufnr)
   else
-    vim.cmd("edit " .. filepath)
+    vim.cmd.edit(filepath)
   end
 end
 

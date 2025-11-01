@@ -1,28 +1,15 @@
 -- ~/.config/nvim/lua/plugins/lsp.lua
--- ✅ Neovim 0.11+ (vim.lsp.config API)
--- ✅ Mason + lazy LSP + nvim-cmp integration
 
 return {
-  -- 1. Mason Core
   {
     "williamboman/mason.nvim",
     build = ":MasonUpdate",
     lazy = false,
     config = function()
-      require("mason").setup({
-        ui = {
-          border = "rounded",
-          icons = {
-            package_installed = "✓",
-            package_pending = "➜",
-            package_uninstalled = "✗",
-          },
-        },
-      })
+      require("mason").setup()
     end,
   },
 
-  -- 2. Mason-LSPConfig
   {
     "williamboman/mason-lspconfig.nvim",
     lazy = false,
@@ -30,51 +17,34 @@ return {
     config = function()
       require("mason-lspconfig").setup({
         ensure_installed = {
-          "pyright",
-          "ts_ls",
           "bashls",
-          "marksman",
+          "pyright",
           "sqlls",
           "texlab",
+          "ts_ls",
         },
         automatic_installation = true,
       })
     end,
   },
 
-  -- 3. LSP Setup (future-proof, filetype-triggered)
   {
     "neovim/nvim-lspconfig",
     lazy = false,
     config = function()
       local cmp_capabilities = require("cmp_nvim_lsp").default_capabilities()
-      local util = require("lspconfig.util")
 
-      -- Statische Server
-      local servers = { "pyright", "ts_ls", "bashls", "sqlls", "texlab" }
+      local servers = { "bashls", "pyright", "sqlls", "texlab", "ts_ls" }
       for _, name in ipairs(servers) do
         vim.lsp.config(name, {
           capabilities = cmp_capabilities,
         })
       end
 
-      -- Marksman (Markdown)
-      vim.lsp.config("marksman", {
-        cmd                 = { "marksman", "server" },
-        filetypes           = { "markdown" },
-        single_file_support = true,
-        capabilities        = cmp_capabilities,
-        root_dir = function(fname)
-          return util.find_git_ancestor(fname)
-        end,
-      })
-
-      -- Aktivierung
-      vim.lsp.enable({ "pyright", "ts_ls", "bashls", "sqlls", "texlab", "marksman" })
+      vim.lsp.enable({ "bashls", "pyright", "sqlls", "texlab", "ts_ls" })
     end,
   },
 
-  -- 4. Completion (nvim-cmp)
   {
     "hrsh7th/nvim-cmp",
     lazy = false,
@@ -95,30 +65,22 @@ return {
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
-              luasnip.expand_or_jump()
-            else
-              fallback()
-            end
+            if cmp.visible() then cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then luasnip.expand_or_jump()
+            else fallback() end
           end, { "i", "s" }),
           ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
-              luasnip.jump(-1)
-            else
-              fallback()
-            end
+            if cmp.visible() then cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then luasnip.jump(-1)
+            else fallback() end
           end, { "i", "s" }),
         }),
-        sources = cmp.config.sources({
+        sources = {
           { name = "nvim_lsp" },
           { name = "luasnip" },
           { name = "buffer" },
           { name = "path" },
-        }),
+        },
       })
     end,
   },
