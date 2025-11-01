@@ -92,11 +92,7 @@ Start Neovim and perform a `:Lazy update` to syncronize your plugins.
 
 ### Individual configuration
 
-Clone this repository into your Neovim configuration directory and start Neovim (it will automatically install all plugins via lazy.nvim):
-
-```bash
-git clone https://marmork@bitbucket.org/marmork/nvim.git ~/.config/nvim
-```
+Clone this repository into your Neovim configuration directory and start Neovim (it will automatically install all plugins via lazy.nvim).
 
 ## 🧭 Usage
 
