@@ -1,9 +1,7 @@
 -- Leader Key
 vim.g.mapleader = " "
 
-------------------------------------------------------------
--- Lazy.nvim Bootstrap
-------------------------------------------------------------
+-- Lazy.nvim bootstrap
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -14,35 +12,18 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-------------------------------------------------------------
--- Safe LuaRocks integration
-------------------------------------------------------------
+-- Safe LuaRocks integration (only if luarocks dirs exist)
 local luarocks_path = vim.fn.expand("~/.luarocks/share/lua/5.1/?.lua")
 local luarocks_cpath = vim.fn.expand("~/.luarocks/lib/lua/5.1/?.so")
+if vim.loop.fs_stat(vim.fn.expand("~/.luarocks")) then
+  package.path = package.path .. ";" .. luarocks_path
+  package.cpath = package.cpath .. ";" .. luarocks_cpath
+end
 
--- Append instead of prepend
-package.path = package.path .. ";" .. luarocks_path
-package.cpath = package.cpath .. ";" .. luarocks_cpath
-
-------------------------------------------------------------
--- Enable soft wrap only for specific file types
-------------------------------------------------------------
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "markdown", "tex", "typst", "text" },
-  callback = function()
-    vim.opt_local.wrap = true
-    vim.opt_local.linebreak = true
-  end,
-})
-
-------------------------------------------------------------
 -- Load plugins
-------------------------------------------------------------
 require("lazy").setup("plugins")
 
-------------------------------------------------------------
 -- Load configuration modules
-------------------------------------------------------------
 require("config.settings")
 require("config.workspaces")
 require("config.keymaps")
