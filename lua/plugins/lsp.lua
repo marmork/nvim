@@ -1,18 +1,18 @@
 -- ~/.config/nvim/lua/plugins/lsp.lua
 
 return {
+  -- 1. Mason
   {
     "williamboman/mason.nvim",
     build = ":MasonUpdate",
-    lazy = false,
     config = function()
       require("mason").setup()
     end,
   },
 
+  -- 2. Mason LSP Config
   {
     "williamboman/mason-lspconfig.nvim",
-    lazy = false,
     dependencies = { "neovim/nvim-lspconfig", "williamboman/mason.nvim" },
     config = function()
       require("mason-lspconfig").setup({
@@ -28,6 +28,7 @@ return {
     end,
   },
 
+  -- 3. Mason Tool Installer (for linter/formatter)
   {
     'WhoIsSethDaniel/mason-tool-installer.nvim',
     dependencies = { 'williamboman/mason.nvim' },
@@ -38,9 +39,9 @@ return {
     end,
   },
 
+  -- 4. nvim-lspconfig
   {
     "neovim/nvim-lspconfig",
-    lazy = false,
     config = function()
       local cmp_capabilities = require("cmp_nvim_lsp").default_capabilities()
 
@@ -50,8 +51,6 @@ return {
           capabilities = cmp_capabilities,
         })
       end
-
-      vim.lsp.enable({ "bashls", "pyright", "sqlls", "texlab", "ts_ls" })
     end,
   },
 
