@@ -39,13 +39,22 @@ function M.setup_zotero()
   pcall(function() telescope.load_extension("zotero") end)
 end
 
+------------------------------------------------------------
+-- 📂 File handling
+------------------------------------------------------------
 local function open_file(filepath)
-  local buf_exists = vim.fn.bufnr(filepath) ~= -1
-  if buf_exists then
+  local full = vim.fn.fnamemodify(filepath, ":p")
+  local escaped = vim.fn.fnameescape(full)
+
+  -- Reuse buffer if it exists
+  local bufnr = vim.fn.bufnr(full)
+  if bufnr ~= -1 then
     vim.api.nvim_set_current_buf(bufnr)
-  else
-    vim.cmd.edit(filepath)
+    return
   end
+
+  -- Otherwise open safely
+  vim.cmd("edit " .. escaped)
 end
 
 ------------------------------------------------------------
