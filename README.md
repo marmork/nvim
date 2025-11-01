@@ -31,6 +31,7 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 │         ├── keymaps.lua → Centralized keybindings
 |         ├── lint_setup.lua → Configure linter
 |         ├── settings.lua → Neovim options (tabs, numbers, etc.)
+|         ├── tool_installer → Mason: Define Linters/Formatters to install
 │         ├── workspaces.lua → Writing/Coding mode switching logic
 |    ├──plugins/ → One file per plugin definition
 |         ├── editor.lua
@@ -61,14 +62,11 @@ sudo apt install -y \
 # Set up pipx
 pipx ensurepath
 
-# Python-based tools
-pipx install black
+# Manually installed tools (Mason does not manage these, e.g., for LaTeX/Typst)
 pipx install pynvim
-pipx install sqlfluff
 pipx install typst
 
 # Node-based tools
-sudo npm install -g prettier eslint_d
 sudo npm install -g tree-sitter-cli
 ```
 
@@ -107,8 +105,9 @@ Clone this repository into your Neovim configuration directory and start Neovim 
 - Open Lazy plugin manager: `:Lazy`
 - Update plugins: `:Lazy update`
 - Synchronize plugin list: `:Lazy sync`
-- Format current file: `:lua vim.lsp.buf.format()`
+- Format current file: `:ConformFormat`
 - Check plugin health: `:checkhealth`
+- Open Mason (Tool Manager): `:Mason`
 
 ## 🔄 Updating Your Setup
 
