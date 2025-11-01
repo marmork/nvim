@@ -15,7 +15,7 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 ✅ Key tools included:
 
 - Modern UI (Gruvbox theme, nvim-tree, Telescope)
-- Built-in LSP, linting, and formatting (via `none-ls.nvim`)
+- Built-in LSP, linting, and formatting
 - Automatic formatting on save
 
 ---
