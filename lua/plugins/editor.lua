@@ -58,11 +58,10 @@ return {
     config = function()
       require("nvim-tree").setup({
         -- Actions configuration: Open file will quit nvim-tree and resize the window
-        actions = { open_file = { quit_on_open = true, resize_window = true } },
+        actions = { 
+          open_file = { quit_on_open = true, resize_window = true } 
+        },
         filters = {
-          -- FIX: Setting 'dotfiles' to true activates the built-in filter,
-          -- which is required for the `toggle_hidden_filter()` API command 
-          -- (mapped to <leader>h) to function correctly.
           dotfiles = true, 
         },
         -- on_attach is left empty, as keymaps are defined globally in keymaps.lua
