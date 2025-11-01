@@ -44,13 +44,16 @@ return {
     "neovim/nvim-lspconfig",
     config = function()
       local cmp_capabilities = require("cmp_nvim_lsp").default_capabilities()
-
-      local servers = { "bashls", "pyright", "sqlls", "texlab", "ts_ls" }
-      for _, name in ipairs(servers) do
-        vim.lsp.config(name, {
-          capabilities = cmp_capabilities,
-        })
+      local on_attach = function(client, bufnr)
       end
+      require('lspconfig.util').default_config = vim.tbl_deep_extend(
+        'force', 
+        require('lspconfig.util').default_config,
+        {
+          on_attach = on_attach,
+          capabilities = cmp_capabilities,
+        }
+      )
     end,
   },
 
