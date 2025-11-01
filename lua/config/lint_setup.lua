@@ -1,34 +1,23 @@
 -- lua/config/lint_setup.lua
+-- Configuration for nvim-lint. Tools are managed by mason.nvim.
 
 local lint = require('lint')
 
--- Helper function to check if a command exists (optional, but good practice)
-local function exists(name)
-    local f = io.popen('command -v ' .. name)
-    if f then
-        local result = f:read('*a')
-        f:close()
-        return result ~= ''
-    end
-    return false
-end
+-- The 'exists' function and associated checks are REMOVED 
+-- because Mason handles the installation and pathing for 'shellcheck' and 'sqlfluff'.
 
 -- Define linters for filetypes
 local linters_by_ft = {}
 
--- 1. Shellcheck (uses nvim-lint built-in if available, otherwise requires custom setup)
-if exists('shellcheck') then
-    -- nvim-lint has a built-in 'shellcheck' linter. 
-    linters_by_ft.sh = { 'shellcheck' }
-end
+-- 1. Shellcheck (Now guaranteed by Mason)
+linters_by_ft.sh = { 'shellcheck' }
 
--- 2. SQLFluff (nvim-lint has a built-in 'sqlfluff' linter)
-if exists('sqlfluff') then
-    -- If the built-in does not support your custom args (--dialect postgres), 
-    -- you might need a custom linter definition (see below for context).
-    linters_by_ft.sql = { 'sqlfluff' }
-end
+-- 2. SQLFluff (Now guaranteed by Mason)
+-- Note: If you have custom arguments (e.g., --dialect postgres) that the built-in
+-- linter does not support, you may need a custom linter definition here.
+linters_by_ft.sql = { 'sqlfluff' }
 
+-- Apply the configured linters to nvim-lint
 lint.linters_by_ft = linters_by_ft
 
 -- Autocommand to run the linters automatically after a file is saved

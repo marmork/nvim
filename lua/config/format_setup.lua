@@ -2,7 +2,7 @@
 
 local conform = require('conform')
 
--- Helper function to check if a command exists (taken from your old config)
+-- Helper function to check if a command exists (KEPT for non-Mason tools)
 local function exists(name)
     local f = io.popen('command -v ' .. name)
     if f then
@@ -16,25 +16,19 @@ end
 -- Configuration Table
 local formatters_by_ft = {}
 
--- 1. Black
-if exists('black') then
-    formatters_by_ft.python = { 'black' }
-end
+-- 1. Black (Now managed by Mason: exists() check removed)
+formatters_by_ft.python = { 'black' }
 
--- 2. Prettier (JS/TS/JSON/Markdown)
-if exists('prettier') then
-    formatters_by_ft.javascript = { 'prettier' }
-    formatters_by_ft.typescript = { 'prettier' }
-    formatters_by_ft.json = { 'prettier' }
-    formatters_by_ft.markdown = { 'prettier' }
-end
+-- 2. Prettier (JS/TS/JSON/Markdown, now managed by Mason: exists() check removed)
+formatters_by_ft.javascript = { 'prettier' }
+formatters_by_ft.typescript = { 'prettier' }
+formatters_by_ft.json = { 'prettier' }
+formatters_by_ft.markdown = { 'prettier' }
 
--- 3. shfmt
-if exists('shfmt') then
-    formatters_by_ft.sh = { 'shfmt' }
-end
+-- 3. shfmt (Now managed by Mason: exists() check removed)
+formatters_by_ft.sh = { 'shfmt' }
 
--- 4. latexindent (Custom formatter)
+-- 4. latexindent (Custom formatter, KEEPING exists() check)
 if exists('latexindent') then
     -- 'conform.nvim' supports running external commands directly
     formatters_by_ft.tex = {
@@ -47,7 +41,7 @@ if exists('latexindent') then
     formatters_by_ft.latex = formatters_by_ft.tex
 end
 
--- 5. typstfmt
+-- 5. typstfmt (KEEPING exists() check)
 if exists('typstfmt') then
     formatters_by_ft.typst = { 'typstfmt' } -- typstfmt is a built-in conform formatter
 end
@@ -68,8 +62,3 @@ conform.setup({
         end,
     },
 })
-
--- The old null-ls autocommand logic is replaced by conform's format_on_save.
--- The only thing left to ensure is that you still need vim.lsp.buf.format
--- for LSPs *if* lsp_fallback is false. Since lsp_fallback is true, 
--- conform handles everything automatically.
