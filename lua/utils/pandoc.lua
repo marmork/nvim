@@ -2,7 +2,6 @@
 -- Utility functions for compiling LaTeX and Markdown to PDF using Pandoc/LaTeX.
 
 local pandoc = {}
-local disp_ok, dispatch = pcall(vim.cmd, 'Dispatch')
 
 -- Fallback function if dispatch is not available
 local function fallback_build(cmd)
