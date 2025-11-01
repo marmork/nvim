@@ -29,6 +29,16 @@ return {
   },
 
   {
+    'WhoIsSethDaniel/mason-tool-installer.nvim',
+    dependencies = { 'williamboman/mason.nvim' },
+    -- Trigger only on setup
+    config = function()
+        -- Load the tool installation setup
+        require('config.tool_installer')
+    end,
+  },
+
+  {
     "neovim/nvim-lspconfig",
     lazy = false,
     config = function()
