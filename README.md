@@ -27,7 +27,9 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 ├── init.lua → Entry point (loads Lazy and your modules)
 ├── lua/
 |    ├──config/
+|         ├── format_setup.lua → Set formatting according to file type
 │         ├── keymaps.lua → Centralized keybindings
+|         ├── lint_setup.lua → Configure linter
 |         ├── settings.lua → Neovim options (tabs, numbers, etc.)
 │         ├── workspaces.lua → Writing/Coding mode switching logic
 |    ├──plugins/ → One file per plugin definition
@@ -54,7 +56,6 @@ sudo apt install -y \
   nodejs npm \
   python3 python3-pip python-is-python3 \
   pipx \
-  shfmt shellcheck \
   ripgrep fd-find unzip
 
 # Set up pipx
