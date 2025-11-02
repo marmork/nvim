@@ -32,11 +32,9 @@ formatters_by_ft.sh = { 'shfmt' }
 if exists('latexindent') then
     -- 'conform.nvim' supports running external commands directly
     formatters_by_ft.tex = {
-        {
-            command = 'latexindent',
-            args = { '-m', '-l' },
-            stdin = true,
-        }
+        command = 'latexindent',
+        args = { '-m', '-l' },
+        stdin = true,
     }
     formatters_by_ft.latex = formatters_by_ft.tex
 end
