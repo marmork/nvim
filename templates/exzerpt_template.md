@@ -1,5 +1,5 @@
 ---
-bibliography: [/home/marcel/Dokumente/Schreiben/Bibliothek.json]
+bibliography: /home/marcel/Dokumente/Schreiben/Bibliothek.bib
 ---
 Autor/in: {{author}}  
 Titel: {{title}}  

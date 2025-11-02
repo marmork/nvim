@@ -34,13 +34,17 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 |         ├── tool_installer → Mason: Define Linters/Formatters to install
 │         ├── workspaces.lua → Writing/Coding mode switching logic
 |    ├──plugins/ → One file per plugin definition
+|         ├── dispatch.lua
 |         ├── editor.lua
 |         ├── git.lua
 |         ├── linting.lua
 |         ├── lsp.lua
 |         ├── theme.lua
 |         ├── zettelkasten.lua
-│    └── utils/ → (optional) custom helpers or shared functions
+│    └── utils/ → custom helpers or shared functions
+|         ├── editor.lua
+|         ├── pandoc.lua
+|         ├── zettelkasten.lua
 └── lazy-lock.json → Version lock for all plugins (auto-generated)
 ```
 
@@ -99,6 +103,15 @@ Clone this repository into your Neovim configuration directory and start Neovim 
 - Switch to writing mode: <leader>ws → changes directory to ~/Documents/Writing
 - Switch to coding mode: <leader>wc → changes directory to ~/repos
 - Toggle file tree: <leader>n
+
+### 🛠️ Writing & Build Commands
+
+This setup uses vim-dispatch to run compilation commands asynchronously in the background, preventing Neovim from freezing.
+
+Details:
+
+- LaTeX (.tex): Uses a chained lualatex (x3) and biber workflow (defined in lua/utils/pandoc.lua) to correctly resolve citations. After successful compilation, all temporary build files (.aux, .log, .bbl, etc.) are automatically removed.
+- Markdown (.md): Uses a single pandoc command with the --citeproc and --pdf-engine=lualatex flags. The bibliography source must be specified in the YAML frontmatter of the Markdown file (e.g., bibliography: /path/to/my/library.bib).
 
 ### 💡 Helpful Commands
 
