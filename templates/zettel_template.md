@@ -1,5 +1,5 @@
 ---
-bibliography: [/home/marcel/Dokumente/Schreiben/Bibliothek.bib]
+bibliography: /home/marcel/Dokumente/Schreiben/Bibliothek.bib
 ---
 # {{title}}
 - Datum: {{date}}
