@@ -11,52 +11,51 @@ end
 
 -- Function to run the command asynchronously using vim-dispatch
 local function run_async(cmd)
-    if disp_ok then
-        -- The ":Dispatch" command runs the command in the background
-        vim.cmd('Dispatch ' .. cmd)
+    -- ROBUST SOLUTION: We use pcall to safely call vim.cmd(‘Dispatch’).
+    -- If Dispatch does not exist (thanks to lazy.nvim), pcall catches the error.
+    local success, err = pcall(vim.cmd, 'Dispatch ' .. cmd)
+    
+    if success then
         vim.notify("Build started in the background: " .. cmd, vim.log.levels.INFO)
     else
+        -- Fallback if the dispatch call fails (e.g., because the plugin was not loaded)
+        vim.notify("Asynchronous execution failed: " .. tostring(err), vim.log.levels.WARN)
         fallback_build(cmd)
     end
 end
 
 --- Compiles a LaTeX file to PDF using lualatex and biber for biblatex support.
 -- This requires a multi-step process for full bibliography resolution.
-function pandoc.latex_biber_build()
-    vim.cmd('write') -- Always save before starting the build
-    
+function pandoc.latex_biber_build()   
     local filename = vim.fn.fnamemodify(vim.fn.expand('%'), ':t:r')
     local file_path = vim.fn.expand('%')
+    local file_dir = vim.fn.expand('%:p:h')
     
     local commands = {
-        'lualatex -shell-escape ' .. file_path,
-        'biber ' .. filename,
-        'lualatex -shell-escape ' .. file_path,
-        'lualatex -shell-escape ' .. file_path, -- Final run for TOC/references
+        'cd ' .. file_dir .. ' && lualatex -shell-escape ' .. filename .. '.tex',
+        'cd ' .. file_dir .. ' && biber ' .. filename,
+        'cd ' .. file_dir .. ' && lualatex -shell-escape ' .. filename .. '.tex',
+        'cd ' .. file_dir .. ' && lualatex -shell-escape ' .. filename .. '.tex',
     }
 
     -- Chain the commands using '&&' for synchronous execution within a single Dispatch shell
     local chained_cmd = table.concat(commands, ' && ')
-
     run_async(chained_cmd)
 end
 
 --- Converts a Markdown file to PDF using Pandoc, including citation processing.
--- Assumes a 'references.bib' file in the current directory or a specified path.
+-- Assumes a 'references.bib' file in the current file or template.
 function pandoc.markdown_to_pdf()
-    vim.cmd('write') -- Always save before starting the conversion
-
     local filename = vim.fn.fnamemodify(vim.fn.expand('%'), ':t:r')
     local file_path = vim.fn.expand('%')
-    local bib_file = 'references.bib' -- Customize the default bibliography file name
+    local file_dir = vim.fn.expand('%:p:h')
+    local output_path = file_dir .. '/' .. filename
     
     local pandoc_cmd = string.format(
-        'pandoc -s --pdf-engine=lualatex --citeproc --bibliography=%s -o %s.pdf %s',
-        bib_file,
-        filename,
+        'pandoc -s --pdf-engine=lualatex --citeproc -o %s.pdf %s',
+        output_path,
         file_path
     )
-
     run_async(pandoc_cmd)
 end
 
