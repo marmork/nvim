@@ -24,18 +24,36 @@ local function run_async(cmd)
     end
 end
 
+-- Function for removing LaTeX auxiliary files
+local function clean_up(filename_base)
+    local extensions = { 
+        'aux', 'bbl', 'bcf', 'blg', 'log', 'out', 'toc', 'run.xml', 'synctex.gz', 
+        'fls', 'fdb_latexmk', 'nav', 'snm' 
+    }
+    
+    local files_to_delete = {}
+    for _, ext in ipairs(extensions) do
+        table.insert(files_to_delete, filename_base .. '.' .. ext)
+    end
+
+    local rm_cmd = 'rm -f ' .. table.concat(files_to_delete, ' ')
+    
+    return rm_cmd
+end
+
 --- Compiles a LaTeX file to PDF using lualatex and biber for biblatex support.
 -- This requires a multi-step process for full bibliography resolution.
 function pandoc.latex_biber_build()   
     local filename = vim.fn.fnamemodify(vim.fn.expand('%'), ':t:r')
     local file_path = vim.fn.expand('%')
     local file_dir = vim.fn.expand('%:p:h')
-    
+    local clean_cmd = clean_up(filename)
     local commands = {
         'cd ' .. file_dir .. ' && lualatex -shell-escape ' .. filename .. '.tex',
         'cd ' .. file_dir .. ' && biber ' .. filename,
         'cd ' .. file_dir .. ' && lualatex -shell-escape ' .. filename .. '.tex',
         'cd ' .. file_dir .. ' && lualatex -shell-escape ' .. filename .. '.tex',
+        'cd ' .. file_dir .. ' && ' .. clean_cmd
     }
 
     -- Chain the commands using '&&' for synchronous execution within a single Dispatch shell
