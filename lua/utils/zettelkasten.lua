@@ -96,18 +96,42 @@ function M.open_zotero_insert_cite()
       local actions = require("telescope.actions")
       local action_state = require("telescope.actions.state")
 
-      local function insert_citekey()
+      local function insert_full_citation()
         local entry = action_state.get_selected_entry()
         if not entry or not entry.value or not entry.value.citekey then
-          vim.notify("No valid CiteKey found", vim.log.levels.WARN)
+          vim.notify("No valid citation key found", vim.log.levels.WARN)
           return
         end
         actions.close(prompt_bufnr)
-        vim.api.nvim_put({ "@" .. entry.value.citekey }, "c", false, true)
+
+        local citekey = entry.value.citekey
+        local prefix = ""
+        local page_ref = ""
+
+        -- Query for the optional prefix, e.g. "cf."
+        local input_prefix = vim.fn.input("Präfix (z.B. vgl. oder cf. - optional): ")
+        if input_prefix ~= nil and #input_prefix > 0 then
+            prefix = input_prefix:match(".* $") and input_prefix or (input_prefix .. " ")
+        end
+
+        -- 2. Query for optional page number/suffix
+        local page_ref = vim.fn.input("Page number (e.g. 23f. or empty): ")
+
+        -- 3. Composition of the complete reference
+        local full_cite = prefix .. "@" .. citekey
+        
+        if page_ref ~= nil and #page_ref > 0 then
+          full_cite = full_cite .. ": " .. page_ref
+        end
+
+        local final_output = "[" .. full_cite .. "]"
+
+        -- 4. Insert into the buffer
+        vim.api.nvim_put({ final_output }, "c", false, true)
       end
 
-      map("i", "<CR>", insert_citekey)
-      map("n", "<CR>", insert_citekey)
+      map("i", "<CR>", insert_full_citation)
+      map("n", "<CR>", insert_full_citation)
       return true
     end,
   })
