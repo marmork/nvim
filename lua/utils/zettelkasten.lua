@@ -285,12 +285,16 @@ function M.open_zotero_create_excerpt()
         local year = entry.value.year or ""
         local subtitle = entry.value.subtitle or ""
         
-        -- PROMPT for custom title (filename suffix)
+        -- PROMPT 1: for custom title (filename suffix)
         local file_title = vim.fn.input("Enter Excerpt Title (for filename suffix): ")
         if file_title == "" then 
           vim.notify("Excerpt creation aborted. Title required.", vim.log.levels.WARN)
           return 
         end
+        
+        -- PROMPT 2: for the page number
+        local page_ref = vim.fn.input("Enter Page Number/Reference (optional): ") -- ADDED PROMPT
+        local page_output = page_ref ~= nil and page_ref or ""
         
         -- Filename logic: Keeps capitalization and uses underscores
         local slug = file_title:gsub("[^%w]+", "_")
@@ -307,8 +311,8 @@ function M.open_zotero_create_excerpt()
         local ok_t, tmpl = pcall(vim.fn.readfile, M.paths.exzerpt_template)
         local content = ok_t and table.concat(tmpl, "\n")
           or ("# " .. title .. "\n\nAuthor: " .. authors .. "\n\nCiteKey: " .. citekey .. "\n")
-
         local date = os.date("%Y-%m-%d")
+        
         content = content
           :gsub("{{author}}", authors) -- Substitutes the formatted author string
           :gsub("{{title}}", title)
@@ -316,6 +320,7 @@ function M.open_zotero_create_excerpt()
           :gsub("{{year}}", year)
           :gsub("{{citekey}}", citekey)
           :gsub("{{date}}", date)
+          :gsub("{{page}}", page_output)
 
         vim.fn.mkdir(M.paths.exzerpte, "p")
         vim.fn.writefile(vim.split(content, "\n"), filepath)
