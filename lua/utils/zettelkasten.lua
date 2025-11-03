@@ -143,20 +143,22 @@ function M.open_zotero_create_excerpt()
       
       -- Priority 1: Check for the diagnosed Zotero fields: lastName and firstName.
       if creator.lastName and creator.firstName then
-        -- Format as "LastName, F."
+        -- Korrigiert: Format als "FirstName LastName"
         local last_name = creator.lastName or ""
-        local first_initial = (creator.firstName and creator.firstName:sub(1, 1) .. ".") or ""
+        local first_name = creator.firstName or ""
         
-        if #last_name > 0 then
-          table.insert(names, last_name .. ", " .. first_initial)
+        if #first_name > 0 and #last_name > 0 then
+          table.insert(names, first_name .. " " .. last_name)
         end
         
       -- Priority 2: Fallback for standard CSL fields (family/given).
       elseif creator.family and creator.given then
+        -- Korrigiert: Format als "Given Family" (voller Name)
         local family_name = creator.family or ""
-        local given_initial = (creator.given and creator.given:sub(1, 1) .. ".") or ""
-        if #family_name > 0 then
-          table.insert(names, family_name .. ", " .. given_initial)
+        local given_name = creator.given or "" -- Hier verwenden wir den vollen Vornamen
+        
+        if #given_name > 0 and #family_name > 0 then
+          table.insert(names, given_name .. " " .. family_name)
         end
         
       -- Priority 3: Fallback for corporate/literal names (raw string).
