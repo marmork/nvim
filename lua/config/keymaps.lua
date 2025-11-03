@@ -213,45 +213,45 @@ end
 local ok_pdc, pandoc = pcall(require, "utils.pandoc")
 
 if ok_pdc and pandoc then
-    vim.api.nvim_create_autocmd("FileType", {
-        -- Applies to LaTeX and Markdown/Pandoc files
-        pattern = { "tex", "markdown", "pandoc" },
-        callback = function(args)
-            local bufnr = args.buf
-            local ft = vim.bo[bufnr].filetype
+  vim.api.nvim_create_autocmd("FileType", {
+    -- Applies to LaTeX and Markdown/Pandoc files
+    pattern = { "tex", "markdown", "pandoc" },
+    callback = function(args)
+      local bufnr = args.buf
+      local ft = vim.bo[bufnr].filetype
 
-            -- Define a local map function for buffer-local keymaps
-            local function bufmap(mode, lhs, rhs, desc)
-                vim.keymap.set(mode, lhs, rhs, { 
-                    noremap = true, 
-                    silent = true, 
-                    buffer = bufnr, 
-                    desc = desc 
-                })
-            end
+      -- Define a local map function for buffer-local keymaps
+      local function bufmap(mode, lhs, rhs, desc)
+        vim.keymap.set(mode, lhs, rhs, { 
+          noremap = true, 
+          silent = true, 
+          buffer = bufnr, 
+          desc = desc 
+        })
+      end
 
-            -- === 1. BUILD COMMAND MAPPING: <leader>b ===
-            
-            if ft == "tex" then
-                -- LaTeX Build (multi-step for biblatex: lualatex, biber, lualatex x2)
-                bufmap("n", "<leader>b", pandoc.latex_biber_build, "LaTeX: Build to PDF (with Biber)")
-            
-            elseif ft == "markdown" or ft == "pandoc" then
-                -- Markdown/Pandoc Build (single pandoc command)
-                bufmap("n", "<leader>b", pandoc.markdown_to_pdf, "Pandoc: Convert to PDF (with Citations)")
-            end
+      -- === 1. BUILD COMMAND MAPPING: <leader>b ===
+      
+      if ft == "tex" then
+        -- LaTeX Build (multi-step for biblatex: lualatex, biber, lualatex x2)
+        bufmap("n", "<leader>b", pandoc.latex_biber_build, "LaTeX: Build to PDF (with Biber)")
+      
+      elseif ft == "markdown" or ft == "pandoc" then
+        -- Markdown/Pandoc Build (single pandoc command)
+        bufmap("n", "<leader>b", pandoc.markdown_to_pdf, "Pandoc: Convert to PDF (with Citations)")
+      end
 
-            -- === 2. VIEW COMMAND MAPPING: <leader>v ===
-            
-            -- Common action for all relevant filetypes: View the generated PDF
-            bufmap("n", "<leader>v", function()
-                local filename = vim.fn.fnamemodify(vim.fn.expand('%'), ':t:r')
-                local file_dir = vim.fn.expand('%:p:h')
-                vim.cmd('silent !xdg-open ' .. file_dir .. '/' .. filename .. '.pdf &')
-            end, "Open generated PDF file")
+      -- === 2. VIEW COMMAND MAPPING: <leader>v ===
+      
+      -- Common action for all relevant filetypes: View the generated PDF
+      bufmap("n", "<leader>v", function()
+        local filename = vim.fn.fnamemodify(vim.fn.expand('%'), ':t:r')
+        local file_dir = vim.fn.expand('%:p:h')
+        vim.cmd('silent !xdg-open ' .. file_dir .. '/' .. filename .. '.pdf &')
+      end, "Open generated PDF file")
 
-        end,
-    })
+    end,
+  })
 end
 
 ---------------------------------------------------------------------
