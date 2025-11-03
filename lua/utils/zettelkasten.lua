@@ -40,7 +40,7 @@ function M.setup_zotero()
 end
 
 ------------------------------------------------------------
--- 📂 File handling
+-- Helper functions
 ------------------------------------------------------------
 local function open_file(filepath)
   local full = vim.fn.fnamemodify(filepath, ":p")
@@ -55,6 +55,34 @@ local function open_file(filepath)
 
   -- Otherwise open safely
   vim.cmd("edit " .. escaped)
+end
+
+-- Determines the quotation format based on the file type
+local function get_citation_format(ft)
+  local prefix = "@"
+  local left_bracket = "["
+  local right_bracket = "]"
+  local separator = ": "
+  
+  if ft == "tex" or ft == "latex" then
+    prefix = "\\cite"
+    left_bracket = "{"
+    right_bracket = "}"
+    separator = ""
+      
+  elseif ft == "typst" then
+    prefix = "@"
+    left_bracket = ""
+    right_bracket = ""
+    separator = ", "
+  end
+  
+  return { 
+    prefix = prefix, 
+    left = left_bracket, 
+    right = right_bracket, 
+    sep = separator 
+  }
 end
 
 ------------------------------------------------------------
@@ -90,6 +118,10 @@ function M.open_zotero_insert_cite()
     return
   end
 
+  -- 1. Determine file type and get formatting rules
+  local current_ft = vim.bo.filetype
+  local format = get_citation_format(current_ft) -- Assumes this function is defined above
+
   telescope.extensions.zotero.zotero({
     bib = M.paths.bib,
     attach_mappings = function(prompt_bufnr, map)
@@ -105,26 +137,56 @@ function M.open_zotero_insert_cite()
         actions.close(prompt_bufnr)
 
         local citekey = entry.value.citekey
-        local prefix = ""
+        local input_prefix = "" -- User input for 'vgl.', 'cf.', etc.
         local page_ref = ""
+        local full_cite_content = "" -- The core citation string, without outer brackets
+        local final_output = ""
 
         -- Query for the optional prefix, e.g. "cf."
-        local input_prefix = vim.fn.input("Präfix (z.B. vgl. oder cf. - optional): ")
-        if input_prefix ~= nil and #input_prefix > 0 then
-            prefix = input_prefix:match(".* $") and input_prefix or (input_prefix .. " ")
+        local user_prefix = vim.fn.input("Präfix (z.B. vgl. oder cf. - optional): ")
+        if user_prefix ~= nil and #user_prefix > 0 then
+          input_prefix = user_prefix
         end
 
-        -- 2. Query for optional page number/suffix
-        local page_ref = vim.fn.input("Page number (e.g. 23f. or empty): ")
+        -- Query for optional page number/suffix
+        page_ref = vim.fn.input("Page number (e.g. 23f. or empty): ")
 
-        -- 3. Composition of the complete reference
-        local full_cite = prefix .. "@" .. citekey
+        -- 2. COMPOSITION BASED ON FORMAT (ft)
         
-        if page_ref ~= nil and #page_ref > 0 then
-          full_cite = full_cite .. ": " .. page_ref
+        if format.prefix == "\\cite" then
+          -- A. LaTeX/BibTeX Format: \cite[Präfix][Seite]{CiteKey}
+          local pre_bracket = input_prefix ~= "" and "[" .. input_prefix .. "]" or ""
+          local post_bracket = page_ref ~= "" and "[" .. page_ref .. "]" or ""
+          
+          -- Assemble as \cite[pre][post]{key}
+          full_cite_content = format.prefix .. pre_bracket .. post_bracket .. "{" .. citekey .. "}"
+            
+        elseif format.prefix == "@" and format.left == "[" then
+          -- B. Markdown/Telekasten Format: [Präfix @CiteKey: Seite]
+          -- Ensure a space after the prefix if it exists
+          local pre = input_prefix ~= "" and (input_prefix .. " ") or ""
+          local post = page_ref ~= "" and (format.sep .. page_ref) or ""
+          
+          -- Assemble as (prefix @key separator page)
+          full_cite_content = pre .. format.prefix .. citekey .. post
+            
+        elseif format.prefix == "@" and format.left == "" then
+          -- C. Typst Format: @CiteKey, Präfix, Seite
+          -- Prefix and page ref are treated as comma-separated arguments in Typst
+          local pre = input_prefix ~= "" and (format.sep .. input_prefix) or ""
+          local post = page_ref ~= "" and (format.sep .. page_ref) or ""
+          
+          -- Assemble as @key, prefix, page
+          full_cite_content = format.prefix .. citekey .. pre .. post
         end
 
-        local final_output = "[" .. full_cite .. "]"
+
+        -- 3. Final Output Wrapping (only necessary for Markdown style)
+        final_output = full_cite_content
+        if format.left ~= "" and format.prefix ~= "\\cite" then
+          -- Wraps the entire string in brackets for Markdown/Telekasten
+          final_output = format.left .. full_cite_content .. format.right
+        end
 
         -- 4. Insert into the buffer
         vim.api.nvim_put({ final_output }, "c", false, true)
