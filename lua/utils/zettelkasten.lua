@@ -6,16 +6,14 @@ local M = {}
 -- 📁 Paths & templates
 ------------------------------------------------------------
 M.paths = {
-  home          = vim.fn.expand('~/Dokumente/Schreiben'),
-  zettelkasten  = vim.fn.expand('~/Dokumente/Schreiben/Zettelkasten'),
-  exzerpte      = vim.fn.expand('~/Dokumente/Schreiben/Exzerpte'),
-  templates     = vim.fn.expand('~/.config/nvim/templates'),
+  home = vim.fn.expand('~/Dokumente/Schreiben/Zettelkasten'),
+  templates = vim.fn.expand('~/.config/nvim/templates'),
 }
 
-M.paths.zettel_template  = M.paths.templates .. '/zettel_template.md'
+M.paths.zettel_template = M.paths.templates .. '/zettel_template.md'
 M.paths.exzerpt_template = M.paths.templates .. '/exzerpt_template.md'
 -- IMPORTANT: Using CSL JSON for the cleanest format.
-M.paths.bib              = M.paths.home .. '/Bibliothek.json'
+M.paths.bib = '~/Dokumente/Schreiben/Bibliothek.json'
 
 ------------------------------------------------------------
 -- ⚙️ Setup
@@ -96,14 +94,14 @@ function M.create_new_zettel_with_slug()
   local date_str = os.date("%Y-%m-%d")
   local slug = title:gsub("[^%w]+", "-")
   local filename = string.format("%s-%s.md", date_prefix, slug)
-  local filepath = M.paths.zettelkasten .. "/" .. filename
+  local filepath = M.paths.home .. "/" .. filename
 
   local ok, tmpl = pcall(vim.fn.readfile, M.paths.zettel_template)
   local content = ok and table.concat(tmpl, "\n") or ("# " .. title .. "\n\n" .. date_str .. "\n\n")
 
   content = content:gsub("{{title}}", title):gsub("{{date}}", date_str)
 
-  vim.fn.mkdir(M.paths.zettelkasten, "p")
+  vim.fn.mkdir(M.paths.home, "p")
   vim.fn.writefile(vim.split(content, "\n"), filepath)
   open_file(filepath)
 end
@@ -299,7 +297,7 @@ function M.open_zotero_create_excerpt()
         -- Filename logic: Keeps capitalization and uses underscores
         local slug = file_title:gsub("[^%w]+", "_")
         local filename = string.format("%s_%s.md", citekey, slug)
-        local filepath = M.paths.exzerpte .. "/" .. filename
+        local filepath = M.paths.home .. "/" .. filename
 
         -- File existence check and creation logic
         if vim.loop.fs_stat(filepath) then
@@ -322,7 +320,7 @@ function M.open_zotero_create_excerpt()
           :gsub("{{date}}", date)
           :gsub("{{page}}", page_output)
 
-        vim.fn.mkdir(M.paths.exzerpte, "p")
+        vim.fn.mkdir(M.paths.home, "p")
         vim.fn.writefile(vim.split(content, "\n"), filepath)
         open_file(filepath)
       end
