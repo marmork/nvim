@@ -124,7 +124,7 @@ if ok_tk and telekasten then
   map("n", "<leader>zb", "<cmd>Telekasten show_backlinks<CR>", { desc = "Show Backlinks" })
   map("n", "<leader>zf", "<cmd>Telekasten find_notes<CR>",   { desc = "Find Zettel" })
   map("n", "<leader>zl", "<cmd>Telekasten insert_link<CR>", { desc = "Insert Link" })
-  map("n", "<leader>zo", "<cmd>Telekasten follow_link<CR>", { desc = "Open Link under cursor" })
+  map("n", "<leader>zo", ztk.follow_link_or_open_external, { desc = "Open Link under cursor" })
   map("n", "<leader>zs", "<cmd>Telekasten show_tags<CR>",   { desc = "Show Tags" })
   map("n", "<leader>zt", "<cmd>Telekasten today<CR>",       { desc = "Daily Zettel" })
   

@@ -333,4 +333,32 @@ function M.open_zotero_create_excerpt()
 end
 
 ------------------------------------------------------------
+-- 🔗 Follow link or open external (PDF, etc.)
+------------------------------------------------------------
+function M.follow_link_or_open_external()
+  local ok, telekasten = pcall(require, "telekasten")
+  if not ok then
+    vim.notify("Telekasten not available", vim.log.levels.WARN)
+    return
+  end
+
+  local link = vim.fn.expand("<cWORD>"):gsub("[%[%]]", "")
+  if not link or link == "" then return end
+
+  local filepath = M.paths.home .. "/" .. link
+
+  if link:match("%.pdf$") then
+    if vim.loop.fs_stat(filepath) then
+      vim.fn.jobstart({"evince", filepath}, {detach = true})
+    else
+      vim.notify("PDF not found: " .. filepath, vim.log.levels.WARN)
+    end
+  else
+    telekasten.follow_link()
+  end
+end
+
+M.follow_link_or_open_external = M.follow_link_or_open_external
+
+------------------------------------------------------------
 return M
