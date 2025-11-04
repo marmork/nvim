@@ -9,7 +9,7 @@ Jahr: {{year}}
 Citation Key: {{citekey}}  
 Datum: {{date}}
 
-...
+#exzerpt
 
 ## Tags
 
