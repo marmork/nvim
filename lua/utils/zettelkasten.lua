@@ -285,10 +285,6 @@ function M.open_zotero_create_excerpt()
         
         -- PROMPT 1: for custom title (filename suffix)
         local file_title = vim.fn.input("Enter Excerpt Title (for filename suffix): ")
-        if file_title == "" then 
-          vim.notify("Excerpt creation aborted. Title required.", vim.log.levels.WARN)
-          return 
-        end
         
         -- PROMPT 2: for the page number
         local page_ref = vim.fn.input("Enter Page Number/Reference (optional): ") -- ADDED PROMPT
