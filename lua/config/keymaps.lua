@@ -130,6 +130,7 @@ if ok_tk and telekasten then
   
   -- The core creation functions remain global as they can be called anywhere:
   if ok_zk and ztk then
+    map("n", "<leader>ze", ztk.open_zotero_create_excerpt, {desc = "Zotero: Create excerpt", buffer = true,})
     map("n", "<leader>zn", ztk.create_new_zettel_with_slug, { desc = "New Zettel with slug" })
   end
 end
@@ -153,12 +154,6 @@ if ok_zk and ztk then
       -- Zotero: Insert Citation (dynamic format)
       vim.keymap.set("n", "<leader>zc", ztk.open_zotero_insert_cite, {
         desc = "Zotero: Insert cite key (FT-aware)",
-        buffer = true,
-      })
-
-      -- Zotero: Create Excerpt (using dynamic format logic, if applicable)
-      vim.keymap.set("n", "<leader>ze", ztk.open_zotero_create_excerpt, {
-        desc = "Zotero: Create excerpt",
         buffer = true,
       })
     end,
