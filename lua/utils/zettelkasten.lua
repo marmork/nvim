@@ -290,12 +290,24 @@ function M.open_zotero_create_excerpt()
         local page_ref = vim.fn.input("Enter Page Number/Reference (optional): ") -- ADDED PROMPT
         local page_output = page_ref ~= nil and page_ref or ""
         
-        -- Filename logic: Keeps capitalization and uses underscores
-        local slug = file_title:gsub("[^%w]+", "_")
-        local filename = string.format("%s_%s.md", citekey, slug)
+        -- Filename Logic: Use CiteKey as filename if no title is provided.
+        local filename_base = ""
+        
+        if file_title and #file_title > 0 then
+            -- Title provided: Create slug from title
+            local slug = file_title:gsub("[^%w]+", "_")
+            filename_base = string.format("%s_%s", citekey, slug)
+        else
+            filename_base = citekey
+        end
+        
+        -- Final filename construction
+        local filename = filename_base .. ".md"
         local filepath = M.paths.home .. "/" .. filename
 
         -- File existence check and creation logic
+        -- If file_title was empty, the filename is just CiteKey.md. 
+        -- If that file exists, it will be opened.
         if vim.loop.fs_stat(filepath) then
           vim.notify("Excerpt exists — opening file.", vim.log.levels.INFO)
           open_file(filepath)
@@ -315,6 +327,17 @@ function M.open_zotero_create_excerpt()
           :gsub("{{citekey}}", citekey)
           :gsub("{{date}}", date)
           :gsub("{{page}}", page_output)
+        
+        -- Subtitle Handling: Replace the entire SUBTITLE_BLOCK if subtitle exists.
+        local subtitle_block_placeholder = "{{SUBTITLE_BLOCK}}"
+        if subtitle and #subtitle > 0 then
+          -- If subtitle exists, replace the placeholder with the full line.
+          local subtitle_line = "Untertitel: " .. subtitle
+          content = content:gsub(subtitle_block_placeholder, subtitle_line)
+        else
+          -- If subtitle is empty/nil, remove the placeholder completely.
+          content = content:gsub(subtitle_block_placeholder, "")
+        end
 
         vim.fn.mkdir(M.paths.home, "p")
         vim.fn.writefile(vim.split(content, "\n"), filepath)
