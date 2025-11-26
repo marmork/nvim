@@ -6,16 +6,14 @@ local M = {}
 -- 📁 Paths & templates
 ------------------------------------------------------------
 M.paths = {
-  home          = vim.fn.expand('~/Dokumente/Schreiben'),
-  zettelkasten  = vim.fn.expand('~/Dokumente/Schreiben/Zettelkasten'),
-  exzerpte      = vim.fn.expand('~/Dokumente/Schreiben/Exzerpte'),
-  templates     = vim.fn.expand('~/.config/nvim/templates'),
+  home = vim.fn.expand('~/Dokumente/Schreiben/Zettelkasten'),
+  templates = vim.fn.expand('~/.config/nvim/templates'),
 }
 
-M.paths.zettel_template  = M.paths.templates .. '/zettel_template.md'
+M.paths.zettel_template = M.paths.templates .. '/zettel_template.md'
 M.paths.exzerpt_template = M.paths.templates .. '/exzerpt_template.md'
 -- IMPORTANT: Using CSL JSON for the cleanest format.
-M.paths.bib              = M.paths.home .. '/Bibliothek.json'
+M.paths.bib = '~/Dokumente/Schreiben/Bibliothek.json'
 
 ------------------------------------------------------------
 -- ⚙️ Setup
@@ -40,7 +38,7 @@ function M.setup_zotero()
 end
 
 ------------------------------------------------------------
--- 📂 File handling
+-- Helper functions
 ------------------------------------------------------------
 local function open_file(filepath)
   local full = vim.fn.fnamemodify(filepath, ":p")
@@ -57,6 +55,34 @@ local function open_file(filepath)
   vim.cmd("edit " .. escaped)
 end
 
+-- Determines the quotation format based on the file type
+local function get_citation_format(ft)
+  local prefix = "@"
+  local left_bracket = "["
+  local right_bracket = "]"
+  local separator = ": "
+  
+  if ft == "tex" or ft == "latex" then
+    prefix = "\\cite"
+    left_bracket = "{"
+    right_bracket = "}"
+    separator = ""
+      
+  elseif ft == "typst" then
+    prefix = "@"
+    left_bracket = ""
+    right_bracket = ""
+    separator = ", "
+  end
+  
+  return { 
+    prefix = prefix, 
+    left = left_bracket, 
+    right = right_bracket, 
+    sep = separator 
+  }
+end
+
 ------------------------------------------------------------
 -- 🧠 Zettelkasten
 ------------------------------------------------------------
@@ -68,14 +94,14 @@ function M.create_new_zettel_with_slug()
   local date_str = os.date("%Y-%m-%d")
   local slug = title:gsub("[^%w]+", "-")
   local filename = string.format("%s-%s.md", date_prefix, slug)
-  local filepath = M.paths.zettelkasten .. "/" .. filename
+  local filepath = M.paths.home .. "/" .. filename
 
   local ok, tmpl = pcall(vim.fn.readfile, M.paths.zettel_template)
   local content = ok and table.concat(tmpl, "\n") or ("# " .. title .. "\n\n" .. date_str .. "\n\n")
 
   content = content:gsub("{{title}}", title):gsub("{{date}}", date_str)
 
-  vim.fn.mkdir(M.paths.zettelkasten, "p")
+  vim.fn.mkdir(M.paths.home, "p")
   vim.fn.writefile(vim.split(content, "\n"), filepath)
   open_file(filepath)
 end
@@ -90,24 +116,82 @@ function M.open_zotero_insert_cite()
     return
   end
 
+  -- 1. Determine file type and get formatting rules
+  local current_ft = vim.bo.filetype
+  local format = get_citation_format(current_ft) -- Assumes this function is defined above
+
   telescope.extensions.zotero.zotero({
     bib = M.paths.bib,
     attach_mappings = function(prompt_bufnr, map)
       local actions = require("telescope.actions")
       local action_state = require("telescope.actions.state")
 
-      local function insert_citekey()
+      local function insert_full_citation()
         local entry = action_state.get_selected_entry()
         if not entry or not entry.value or not entry.value.citekey then
-          vim.notify("No valid CiteKey found", vim.log.levels.WARN)
+          vim.notify("No valid citation key found", vim.log.levels.WARN)
           return
         end
         actions.close(prompt_bufnr)
-        vim.api.nvim_put({ "@" .. entry.value.citekey }, "c", false, true)
+
+        local citekey = entry.value.citekey
+        local input_prefix = "" -- User input for 'vgl.', 'cf.', etc.
+        local page_ref = ""
+        local full_cite_content = "" -- The core citation string, without outer brackets
+        local final_output = ""
+
+        -- Query for the optional prefix, e.g. "cf."
+        local user_prefix = vim.fn.input("Präfix (z.B. vgl. oder cf. - optional): ")
+        if user_prefix ~= nil and #user_prefix > 0 then
+          input_prefix = user_prefix
+        end
+
+        -- Query for optional page number/suffix
+        page_ref = vim.fn.input("Page number (e.g. 23f. or empty): ")
+
+        -- 2. COMPOSITION BASED ON FORMAT (ft)
+        
+        if format.prefix == "\\cite" then
+          -- A. LaTeX/BibTeX Format: \cite[Präfix][Seite]{CiteKey}
+          local pre_bracket = input_prefix ~= "" and "[" .. input_prefix .. "]" or ""
+          local post_bracket = page_ref ~= "" and "[" .. page_ref .. "]" or ""
+          
+          -- Assemble as \cite[pre][post]{key}
+          full_cite_content = format.prefix .. pre_bracket .. post_bracket .. "{" .. citekey .. "}"
+            
+        elseif format.prefix == "@" and format.left == "[" then
+          -- B. Markdown/Telekasten Format: [Präfix @CiteKey: Seite]
+          -- Ensure a space after the prefix if it exists
+          local pre = input_prefix ~= "" and (input_prefix .. " ") or ""
+          local post = page_ref ~= "" and (format.sep .. page_ref) or ""
+          
+          -- Assemble as (prefix @key separator page)
+          full_cite_content = pre .. format.prefix .. citekey .. post
+            
+        elseif format.prefix == "@" and format.left == "" then
+          -- C. Typst Format: @CiteKey, Präfix, Seite
+          -- Prefix and page ref are treated as comma-separated arguments in Typst
+          local pre = input_prefix ~= "" and (format.sep .. input_prefix) or ""
+          local post = page_ref ~= "" and (format.sep .. page_ref) or ""
+          
+          -- Assemble as @key, prefix, page
+          full_cite_content = format.prefix .. citekey .. pre .. post
+        end
+
+
+        -- 3. Final Output Wrapping (only necessary for Markdown style)
+        final_output = full_cite_content
+        if format.left ~= "" and format.prefix ~= "\\cite" then
+          -- Wraps the entire string in brackets for Markdown/Telekasten
+          final_output = format.left .. full_cite_content .. format.right
+        end
+
+        -- 4. Insert into the buffer
+        vim.api.nvim_put({ final_output }, "c", false, true)
       end
 
-      map("i", "<CR>", insert_citekey)
-      map("n", "<CR>", insert_citekey)
+      map("i", "<CR>", insert_full_citation)
+      map("n", "<CR>", insert_full_citation)
       return true
     end,
   })
@@ -143,20 +227,22 @@ function M.open_zotero_create_excerpt()
       
       -- Priority 1: Check for the diagnosed Zotero fields: lastName and firstName.
       if creator.lastName and creator.firstName then
-        -- Format as "LastName, F."
+        -- Korrigiert: Format als "FirstName LastName"
         local last_name = creator.lastName or ""
-        local first_initial = (creator.firstName and creator.firstName:sub(1, 1) .. ".") or ""
+        local first_name = creator.firstName or ""
         
-        if #last_name > 0 then
-          table.insert(names, last_name .. ", " .. first_initial)
+        if #first_name > 0 and #last_name > 0 then
+          table.insert(names, first_name .. " " .. last_name)
         end
         
       -- Priority 2: Fallback for standard CSL fields (family/given).
       elseif creator.family and creator.given then
+        -- Korrigiert: Format als "Given Family" (voller Name)
         local family_name = creator.family or ""
-        local given_initial = (creator.given and creator.given:sub(1, 1) .. ".") or ""
-        if #family_name > 0 then
-          table.insert(names, family_name .. ", " .. given_initial)
+        local given_name = creator.given or "" -- Hier verwenden wir den vollen Vornamen
+        
+        if #given_name > 0 and #family_name > 0 then
+          table.insert(names, given_name .. " " .. family_name)
         end
         
       -- Priority 3: Fallback for corporate/literal names (raw string).
@@ -197,19 +283,31 @@ function M.open_zotero_create_excerpt()
         local year = entry.value.year or ""
         local subtitle = entry.value.subtitle or ""
         
-        -- PROMPT for custom title (filename suffix)
+        -- PROMPT 1: for custom title (filename suffix)
         local file_title = vim.fn.input("Enter Excerpt Title (for filename suffix): ")
-        if file_title == "" then 
-          vim.notify("Excerpt creation aborted. Title required.", vim.log.levels.WARN)
-          return 
+        
+        -- PROMPT 2: for the page number
+        local page_ref = vim.fn.input("Enter Page Number/Reference (optional): ") -- ADDED PROMPT
+        local page_output = page_ref ~= nil and page_ref or ""
+        
+        -- Filename Logic: Use CiteKey as filename if no title is provided.
+        local filename_base = ""
+        
+        if file_title and #file_title > 0 then
+            -- Title provided: Create slug from title
+            local slug = file_title:gsub("[^%w]+", "_")
+            filename_base = string.format("%s_%s", citekey, slug)
+        else
+            filename_base = citekey
         end
         
-        -- Filename logic: Keeps capitalization and uses underscores
-        local slug = file_title:gsub("[^%w]+", "_")
-        local filename = string.format("%s_%s.md", citekey, slug)
-        local filepath = M.paths.exzerpte .. "/" .. filename
+        -- Final filename construction
+        local filename = filename_base .. ".md"
+        local filepath = M.paths.home .. "/" .. filename
 
         -- File existence check and creation logic
+        -- If file_title was empty, the filename is just CiteKey.md. 
+        -- If that file exists, it will be opened.
         if vim.loop.fs_stat(filepath) then
           vim.notify("Excerpt exists — opening file.", vim.log.levels.INFO)
           open_file(filepath)
@@ -219,8 +317,8 @@ function M.open_zotero_create_excerpt()
         local ok_t, tmpl = pcall(vim.fn.readfile, M.paths.exzerpt_template)
         local content = ok_t and table.concat(tmpl, "\n")
           or ("# " .. title .. "\n\nAuthor: " .. authors .. "\n\nCiteKey: " .. citekey .. "\n")
-
         local date = os.date("%Y-%m-%d")
+        
         content = content
           :gsub("{{author}}", authors) -- Substitutes the formatted author string
           :gsub("{{title}}", title)
@@ -228,8 +326,20 @@ function M.open_zotero_create_excerpt()
           :gsub("{{year}}", year)
           :gsub("{{citekey}}", citekey)
           :gsub("{{date}}", date)
+          :gsub("{{page}}", page_output)
+        
+        -- Subtitle Handling: Replace the entire SUBTITLE_BLOCK if subtitle exists.
+        local subtitle_block_placeholder = "{{SUBTITLE_BLOCK}}"
+        if subtitle and #subtitle > 0 then
+          -- If subtitle exists, replace the placeholder with the full line.
+          local subtitle_line = "Untertitel: " .. subtitle
+          content = content:gsub(subtitle_block_placeholder, subtitle_line)
+        else
+          -- If subtitle is empty/nil, remove the placeholder completely.
+          content = content:gsub(subtitle_block_placeholder, "")
+        end
 
-        vim.fn.mkdir(M.paths.exzerpte, "p")
+        vim.fn.mkdir(M.paths.home, "p")
         vim.fn.writefile(vim.split(content, "\n"), filepath)
         open_file(filepath)
       end
@@ -240,6 +350,34 @@ function M.open_zotero_create_excerpt()
     end,
   })
 end
+
+------------------------------------------------------------
+-- 🔗 Follow link or open external (PDF, etc.)
+------------------------------------------------------------
+function M.follow_link_or_open_external()
+  local ok, telekasten = pcall(require, "telekasten")
+  if not ok then
+    vim.notify("Telekasten not available", vim.log.levels.WARN)
+    return
+  end
+
+  local link = vim.fn.expand("<cWORD>"):gsub("[%[%]]", "")
+  if not link or link == "" then return end
+
+  local filepath = M.paths.home .. "/" .. link
+
+  if link:match("%.pdf$") then
+    if vim.loop.fs_stat(filepath) then
+      vim.fn.jobstart({"evince", filepath}, {detach = true})
+    else
+      vim.notify("PDF not found: " .. filepath, vim.log.levels.WARN)
+    end
+  else
+    telekasten.follow_link()
+  end
+end
+
+M.follow_link_or_open_external = M.follow_link_or_open_external
 
 ------------------------------------------------------------
 return M

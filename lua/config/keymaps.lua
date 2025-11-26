@@ -113,24 +113,98 @@ map("n", "<leader>hb", function()
 end, { desc = "Gitsigns: toggle blame" })
 
 ---------------------------------------------------------------------
--- Zettelkasten (Telekasten + Zotero utils)
+-- Zettelkasten Utility Functions
 ---------------------------------------------------------------------
 local ok_zk, ztk = pcall(require, "utils.zettelkasten")
-if ok_zk and ztk then
-  map("n", "<leader>zc", ztk.open_zotero_insert_cite, { desc = "Zotero: insert cite key" })
-  map("n", "<leader>ze", ztk.open_zotero_create_excerpt, { desc = "Zotero: create excerpt" })
-  map("n", "<leader>zn", ztk.create_new_zettel_with_slug, { desc = "New Zettel with slug" })
-end
 
--- Telekasten commands
+-- Telekasten commands (These are generic note-taking commands, keep them global)
 local ok_tk, telekasten = pcall(require, "telekasten")
 if ok_tk and telekasten then
+  -- Keymaps for Telekasten commands (no need to restrict by filetype)
   map("n", "<leader>zb", "<cmd>Telekasten show_backlinks<CR>", { desc = "Show Backlinks" })
   map("n", "<leader>zf", "<cmd>Telekasten find_notes<CR>",   { desc = "Find Zettel" })
   map("n", "<leader>zl", "<cmd>Telekasten insert_link<CR>", { desc = "Insert Link" })
-  map("n", "<leader>zo", "<cmd>Telekasten follow_link<CR>", { desc = "Open Link under cursor" })
+  map("n", "<leader>zo", ztk.follow_link_or_open_external, { desc = "Open Link under cursor" })
   map("n", "<leader>zs", "<cmd>Telekasten show_tags<CR>",   { desc = "Show Tags" })
   map("n", "<leader>zt", "<cmd>Telekasten today<CR>",       { desc = "Daily Zettel" })
+  
+  -- The core creation functions remain global as they can be called anywhere:
+  if ok_zk and ztk then
+    map("n", "<leader>ze", ztk.open_zotero_create_excerpt, {desc = "Zotero: Create excerpt", buffer = true,})
+    map("n", "<leader>zn", ztk.create_new_zettel_with_slug, { desc = "New Zettel with slug" })
+  end
+end
+
+---------------------------------------------------------------------
+-- 🔑 Filetype-Specific Keymaps (Zotero)
+---------------------------------------------------------------------
+
+-- Create a single Autocommand Group for all citation keymaps
+local citation_augroup = vim.api.nvim_create_augroup("CitationKeymaps", { clear = true })
+
+-- Only load Zotero keymaps for relevant academic filetypes (Markdown, LaTeX, Typst, Telekasten)
+if ok_zk and ztk then
+  vim.api.nvim_create_autocmd("FileType", {
+    group = citation_augroup,
+    -- Define the filetypes where Zotero commands should be active
+    pattern = { "markdown", "telekasten", "tex", "latex", "typst" },
+    callback = function()
+      -- The 'buffer = true' option ensures the mapping is local to the current buffer (filetype)
+      
+      -- Zotero: Insert Citation (dynamic format)
+      vim.keymap.set("n", "<leader>zc", ztk.open_zotero_insert_cite, {
+        desc = "Zotero: Insert cite key (FT-aware)",
+        buffer = true,
+      })
+    end,
+  })
+end
+
+---------------------------------------------------------------------
+-- Pandoc/LaTeX Build Mappings (Filetype-specific)
+---------------------------------------------------------------------
+local ok_pdc, pandoc = pcall(require, "utils.pandoc")
+
+if ok_pdc and pandoc then
+  vim.api.nvim_create_autocmd("FileType", {
+    -- Applies to LaTeX and Markdown/Pandoc files
+    pattern = { "tex", "markdown", "pandoc" },
+    callback = function(args)
+      local bufnr = args.buf
+      local ft = vim.bo[bufnr].filetype
+
+      -- Define a local map function for buffer-local keymaps
+      local function bufmap(mode, lhs, rhs, desc)
+        vim.keymap.set(mode, lhs, rhs, { 
+          noremap = true, 
+          silent = true, 
+          buffer = bufnr, 
+          desc = desc 
+        })
+      end
+
+      -- === 1. BUILD COMMAND MAPPING: <leader>b ===
+      
+      if ft == "tex" then
+        -- LaTeX Build (multi-step for biblatex: lualatex, biber, lualatex x2)
+        bufmap("n", "<leader>b", pandoc.latex_biber_build, "LaTeX: Build to PDF (with Biber)")
+      
+      elseif ft == "markdown" or ft == "pandoc" then
+        -- Markdown/Pandoc Build (single pandoc command)
+        bufmap("n", "<leader>b", pandoc.markdown_to_pdf, "Pandoc: Convert to PDF (with Citations)")
+      end
+
+      -- === 2. VIEW COMMAND MAPPING: <leader>v ===
+      
+      -- Common action for all relevant filetypes: View the generated PDF
+      bufmap("n", "<leader>v", function()
+        local filename = vim.fn.fnamemodify(vim.fn.expand('%'), ':t:r')
+        local file_dir = vim.fn.expand('%:p:h')
+        vim.cmd('silent !xdg-open ' .. file_dir .. '/' .. filename .. '.pdf &')
+      end, "Open generated PDF file")
+
+    end,
+  })
 end
 
 ---------------------------------------------------------------------

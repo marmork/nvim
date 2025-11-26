@@ -113,13 +113,24 @@ return {
   { 
     'folke/zen-mode.nvim',
     opts = {
-        window = {
-            width = 80, 
-            height = 0.95,
+      window = {
+        width = 80, 
+        height = 0.95,
+        options = {
+          wrap = true,
+          linebreak = true,
+          
+          -- Optional, but recommended to keep the view clean:
+          number = false,          -- Disables global ‘number’ setting
+          relativenumber = false,  -- Disables global ‘relativenumber’ setting
         },
-        plugins = {
-            options = { enabled = true }, 
+      },
+      plugins = {
+        options = { 
+          enabled = true, 
+          laststatus = 0, 
         },
+      },
     },
     lazy = true,
     cmd = "ZenMode",
