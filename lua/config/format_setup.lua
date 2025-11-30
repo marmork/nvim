@@ -50,13 +50,14 @@ conform.setup({
 
     -- Enable auto-formatting on save for all configured filetypes
     format_on_save = {
-        -- Use built-in LSPs for formatting if conform has no formatter for the filetype
-        lsp_fallback = true,
-        -- Default: wait for 500ms for LSPs
+        lsp_fallback = function(bufnr)
+            -- Only fallback to LSP if the buffer has an attached LSP client
+            local clients = vim.lsp.get_active_clients({ bufnr = bufnr })
+            return #clients > 0
+        end,
         timeout_ms = 500,
-        -- Condition to only format if the buffer is modifiable
         condition = function(bufnr)
             return vim.bo[bufnr].modifiable and vim.bo[bufnr].filetype ~= ''
         end,
-    },
+    }
 })
