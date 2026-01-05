@@ -3,8 +3,11 @@
 
 local M = {}
 
-M.writing_path = vim.fn.expand('~/Dokumente/Schreiben')
-M.coding_path  = vim.fn.expand('~/repos')
+-- Load local paths
+local paths = require("config.local_paths")
+
+M.coding_path  = vim.fn.expand(paths.coding_path)
+M.writing_path = vim.fn.expand(paths.writing_path)
 
 function M.switch(mode)
   local path

@@ -1,6 +1,3 @@
-# Created by https://www.toptal.com/developers/gitignore/api/lua
-# Edit at https://www.toptal.com/developers/gitignore?templates=lua
-
 ### Lua ###
 # Compiled Lua sources
 luac.out
@@ -44,4 +41,5 @@ luac.out
 *.hex
 
 lazy-lock.json
-# End of https://www.toptal.com/developers/gitignore/api/lua
+
+lua/config/local_paths.lua

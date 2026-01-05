@@ -5,15 +5,27 @@ local M = {}
 ------------------------------------------------------------
 -- 📁 Paths & templates
 ------------------------------------------------------------
+
+local paths = require("config.local_paths")
+
+-- 1. Define the paths table
 M.paths = {
-  home = vim.fn.expand('~/Dokumente/Schreiben/Zettelkasten'),
+  home = vim.fn.expand(paths.zettelkasten_path or ""),
   templates = vim.fn.expand('~/.config/nvim/templates'),
 }
 
+-- 2. Check whether mandatory paths are filled
+if M.paths.home == "" then
+  -- We notify, but return M so the module can still be loaded without crashing
+  vim.notify("Zettelkasten path is not configured in local_paths.lua", vim.log.levels.WARN)
+  return M
+end
+
+-- 3. Build dependent paths
 M.paths.zettel_template = M.paths.templates .. '/zettel_template.md'
 M.paths.exzerpt_template = M.paths.templates .. '/exzerpt_template.md'
 -- IMPORTANT: Using CSL JSON for the cleanest format.
-M.paths.bib = '~/Dokumente/Schreiben/Bibliothek.json'
+M.paths.bib = vim.fn.expand(paths.zotero_bibfile or "")
 
 ------------------------------------------------------------
 -- ⚙️ Setup
