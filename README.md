@@ -30,6 +30,7 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 |         ├── format_setup.lua → Set formatting according to file type
 │         ├── keymaps.lua → Centralized keybindings
 |         ├── lint_setup.lua → Configure linter
+|         ├── local_paths.lua → Define paths
 |         ├── settings.lua → Neovim options (tabs, numbers, etc.)
 |         ├── tool_installer → Mason: Define Linters/Formatters to install
 │         ├── workspaces.lua → Writing/Coding mode switching logic
@@ -76,9 +77,35 @@ sudo npm install -g tree-sitter-cli
 
 ## 🚀 Installation
 
-First, the basics must be installed with `sudo apt install build-essential cmake`. Then, the [official installation instructions](https://github.com/neovim/neovim/blob/master/BUILD.md) can be followed.
+If you previously had another Neovim configuration or are experiencing plugin issues, it is best to start with a clean slate by removing old data and cache folders:
 
-### [Neovim update](#neovim-update)
+```bash
+rm -rf ~/.local/share/nvim
+rm -rf ~/.cache/nvim
+rm -rf ~/.local/state/nvim
+```
+
+### 1. Base installation
+
+1. First, the basics must be installed with `sudo apt install build-essential cmake`.
+2. Clone this repository into your Neovim configuration directory: `git clone https://github.com/marmork/nvim.git ~/.config/nvim`.
+3. Then, the [official installation instructions](https://github.com/neovim/neovim/blob/master/BUILD.md) can be followed.
+
+### 2. First-time setup (required)
+
+Since paths (like your Documents or Research folders) differ between machines, you must create a local configuration file. This file is ignored by Git to keep your setup portable.
+- Navigate to the config directory: `cd ~/.config/nvim/lua/config/`
+- Copy the example configuration: `cp local_paths-example.lua local_paths.lua`
+- Edit local_paths.lua and fill in your specific system paths!
+
+### 3. Initialize plugins
+
+Start Neovim: `nvim`. Lazy.nvim will start automatically and begin downloading all required plugins.
+- Wait for the process to finish (a UI will show the progress).
+- Once finished, you can close the UI by pressing q.
+- Restart Neovim once to ensure all plugins and LSPs are correctly loaded.
+
+### 4. [Neovim update](#neovim-update)
 
 To prevent the difference between Neovim and your individual configuration from becoming too large, you should update your Neovim installation every few weeks (at least every two months). This works as follows:
 
@@ -91,10 +118,6 @@ sudo make install
 ```
 
 Start Neovim and perform a `:Lazy update` to syncronize your plugins.
-
-### Individual configuration
-
-Clone this repository into your Neovim configuration directory and start Neovim (it will automatically install all plugins via lazy.nvim).
 
 ## 🧭 Usage
 
@@ -152,6 +175,7 @@ To debug or reset your Neovim environment:
 ```bash
 rm -rf ~/.local/share/nvim
 rm -rf ~/.cache/nvim
+rm -rf ~/.local/state/nvim
 nvim
 ```
 
