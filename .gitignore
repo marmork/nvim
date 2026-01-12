@@ -40,6 +40,4 @@ luac.out
 *.x86_64
 *.hex
 
-lazy-lock.json
-
 lua/config/local_paths.lua

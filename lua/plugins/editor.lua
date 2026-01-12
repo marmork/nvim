@@ -94,15 +94,25 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    config = function()
-      require("nvim-treesitter.configs").setup({
-        autotag = { enable = true },
-        ensure_installed = { "bash", "python", "javascript", "typescript", "lua", "markdown", "sql", "latex" },
-        fold = { enable = true },
-        highlight = { enable = true },
-        indent = { enable = true },
-        textobjects = { enable = true },
-      })
+    -- Use 'opts' instead of 'config' for better compatibility with newer TS versions
+    opts = {
+      ensure_installed = { "bash", "python", "javascript", "typescript", "lua", "markdown", "sql", "latex" },
+      highlight = { enable = true },
+      indent = { enable = true },
+      -- Note: autotag and textobjects often need their own setup now 
+      -- or are handled via the new internal init
+    },
+    config = function(_, opts)
+      -- The new version 1.0.0+ logic:
+      -- We check if the old module exists, otherwise we use the new way
+      local ok, configs = pcall(require, "nvim-treesitter.configs")
+      if ok then
+        configs.setup(opts)
+      else
+        -- In v1.0.0+, many settings are handled automatically via 'opts'
+        -- if you use a plugin manager like lazy.nvim
+        require("nvim-treesitter").setup(opts)
+      end
     end,
   },
 
