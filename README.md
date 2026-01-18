@@ -94,6 +94,7 @@ rm -rf ~/.local/state/nvim
 ### 2. First-time setup (required)
 
 Since paths (like your Documents or Research folders) differ between machines, you must create a local configuration file. This file is ignored by Git to keep your setup portable.
+
 - Navigate to the config directory: `cd ~/.config/nvim/lua/config/`
 - Copy the example configuration: `cp local_paths-example.lua local_paths.lua`
 - Edit local_paths.lua and fill in your specific system paths!
@@ -101,23 +102,14 @@ Since paths (like your Documents or Research folders) differ between machines, y
 ### 3. Initialize plugins
 
 Start Neovim: `nvim`. Lazy.nvim will start automatically and begin downloading all required plugins.
+
 - Wait for the process to finish (a UI will show the progress).
 - Once finished, you can close the UI by pressing q.
 - Restart Neovim once to ensure all plugins and LSPs are correctly loaded.
 
 ### 4. [Neovim update](#neovim-update)
 
-To prevent the difference between Neovim and your individual configuration from becoming too large, you should update your Neovim installation every few weeks (at least every two months). This works as follows:
-
-```bash
-cd ~/repos/neovim
-git checkout stable
-git pull origin stable
-rm -rf build/ .deps/ CMakeCache.txt CMakeFiles/ [optional]
-sudo make install
-```
-
-Start Neovim and perform a `:Lazy update` to syncronize your plugins.
+To prevent the difference between Neovim and your individual configuration from becoming too large, you should update your Neovim installation every few weeks (at least every two months). This works as follows: Run `chmod +x update_nvim.sh` once and update with `./update_nvim.sh`. Then start Neovim and perform a `:Lazy update` to syncronize your plugins.
 
 ## 🧭 Usage
 
