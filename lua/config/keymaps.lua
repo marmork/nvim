@@ -113,6 +113,24 @@ map("n", "<leader>hb", function()
 end, { desc = "Gitsigns: toggle blame" })
 
 ---------------------------------------------------------------------
+-- Telescope (Search & Grep)
+---------------------------------------------------------------------
+local ok_tel, _ = pcall(require, "telescope")
+if ok_tel then
+  -- Basic file search
+  map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { desc = "Telescope: Find Files" })
+  
+  -- Advanced text search (Live Grep with Arguments)
+  map("n", "<leader>fg", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", { desc = "Telescope: Live Grep (Args)" })
+  
+  -- Search in open buffers
+  map("n", "<leader>fb", "<cmd>Telescope buffers<CR>", { desc = "Telescope: Buffers" })
+  
+  -- Help tags
+  map("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", { desc = "Telescope: Help Tags" })
+end
+
+---------------------------------------------------------------------
 -- Zettelkasten Utility Functions
 ---------------------------------------------------------------------
 local ok_zk, ztk = pcall(require, "utils.zettelkasten")

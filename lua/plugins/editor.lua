@@ -51,6 +51,32 @@ return {
     },
   },
 
+  -- Telescope & Live Grep Args
+  {
+    "nvim-telescope/telescope.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      { 
+        "nvim-telescope/telescope-live-grep-args.nvim", 
+        version = "^1.0.0" 
+      },
+    },
+    config = function()
+      local telescope = require("telescope")
+
+      -- First setup telescope
+      -- Standard search behavior is configured here
+      telescope.setup({
+        defaults = {
+          -- Default configurations if needed
+        },
+      })
+
+      -- Then load the extension
+      telescope.load_extension("live_grep_args")
+    end,
+  },
+
   -- nvim-tree
   {
     "nvim-tree/nvim-tree.lua",
