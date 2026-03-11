@@ -1,8 +1,16 @@
--- lua/config/format_setup.lua
+--- @file format_setup.lua
+--- @brief Configuration for conform.nvim (Formatter)
+---
+--- This setup handles:
+--- 1. Global trailing whitespace trimming for all filetypes.
+--- 2. Python formatting via Ruff.
+--- 3. JS/TS specifically forced to 4-space tabs; others (JSON/MD) use defaults.
+--- 4. Shell script and LaTeX/Typst formatting.
+--- 5. Automatic format-on-save with LSP fallback.
 
 local conform = require('conform')
 
--- Helper function to check if a command exists (KEPT for non-Mason tools)
+-- Helper function to check if a command exists (for non-Mason tools)
 local function exists(name)
     local f = io.popen('command -v ' .. name)
     if f then
@@ -13,24 +21,30 @@ local function exists(name)
     return false
 end
 
--- Configuration Table
-local formatters_by_ft = {}
+-- 1. Custom Formatter for 4-space JS/TS
+-- We create a specialized version of prettier just for these filetypes
+local prettier_4_spaces = { "prettier", args = { "--stdin-filepath", "$FILENAME", "--tab-width", "4" } }
 
--- 1. Black (Now managed by Mason: exists() check removed)
-formatters_by_ft.python = { 'black' }
+-- 2. Define Formatter mappings by Filetype
+local formatters_by_ft = {
+    -- The "*" filetype runs formatters on ALL files.
+    ["*"] = { "trim_whitespace" },
+    -- Python
+    python = { "ruff_format" },
 
--- 2. Prettier (JS/TS/JSON/Markdown, now managed by Mason: exists() check removed)
-formatters_by_ft.javascript = { 'prettier' }
-formatters_by_ft.typescript = { 'prettier' }
-formatters_by_ft.json = { 'prettier' }
-formatters_by_ft.markdown = { 'prettier' }
+    -- JS/TS: Use the 4-space override
+    javascript = { prettier_4_spaces },
+    typescript = { prettier_4_spaces },
 
--- 3. shfmt (Now managed by Mason: exists() check removed)
-formatters_by_ft.sh = { 'shfmt' }
+    json = { "prettier" },
+    markdown = { "prettier" },
 
--- 4. latexindent (Custom formatter, KEEPING exists() check)
+    -- Shell
+    sh = { "shfmt" },
+}
+
+-- 3. Add Conditional Formatters (Non-Mason)
 if exists('latexindent') then
-    -- 'conform.nvim' supports running external commands directly
     formatters_by_ft.tex = {
         command = 'latexindent',
         args = { '-m', '-l' },
@@ -39,24 +53,20 @@ if exists('latexindent') then
     formatters_by_ft.latex = formatters_by_ft.tex
 end
 
--- 5. typstfmt (KEEPING exists() check)
 if exists('typstfmt') then
-    formatters_by_ft.typst = { 'typstfmt' } -- typstfmt is a built-in conform formatter
+    formatters_by_ft.typst = { 'typstfmt' }
 end
 
-
+-- 4. Final Setup
 conform.setup({
     formatters_by_ft = formatters_by_ft,
 
-    -- Enable auto-formatting on save for all configured filetypes
     format_on_save = {
-        lsp_fallback = function(bufnr)
-            -- Only fallback to LSP if the buffer has an attached LSP client
-            local clients = vim.lsp.get_active_clients({ bufnr = bufnr })
-            return #clients > 0
-        end,
+        -- Only fallback to LSP if no conform formatter is found for the filetype
+        lsp_fallback = true, 
         timeout_ms = 500,
         condition = function(bufnr)
+            -- Only format if the buffer is modifiable
             return vim.bo[bufnr].modifiable and vim.bo[bufnr].filetype ~= ''
         end,
     }

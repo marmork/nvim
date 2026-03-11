@@ -7,6 +7,7 @@ require('mason-tool-installer').setup({
         -- Formatters (used by conform.nvim)
         'black',        -- Python formatter
         'prettier',     -- JS/TS/JSON/Markdown formatter
+        'ruff',         -- Python
         'shfmt',        -- Shell script formatter
         'sqlfluff',     -- SQL formatter
 

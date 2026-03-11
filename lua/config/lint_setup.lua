@@ -9,10 +9,13 @@ local lint = require('lint')
 -- Define linters for filetypes
 local linters_by_ft = {}
 
--- 1. Shellcheck (Now guaranteed by Mason)
+-- Add ruff to python filetypes
+linters_by_ft.python = { 'ruff' }
+
+-- Shellcheck (Now guaranteed by Mason)
 linters_by_ft.sh = { 'shellcheck' }
 
--- 2. SQLFluff (Now guaranteed by Mason)
+-- SQLFluff (Now guaranteed by Mason)
 -- Note: If you have custom arguments (e.g., --dialect postgres) that the built-in
 -- linter does not support, you may need a custom linter definition here.
 linters_by_ft.sql = { 'sqlfluff' }
