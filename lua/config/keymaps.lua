@@ -92,6 +92,21 @@ map("v", "<C-v>", '"+P', { desc = "Paste from system clipboard" })
 -- Select all the contents of a file
 map("n", "<C-a>", "ggvG", { desc = "Select all (ggvG)" })
 
+-- 5. Redo (undo <leader>u)
+map("n", "<leader>r", "<C-r>", { desc = "Redo" })
+
+-- 6. Visual Block Indenting (Tab / Shift-Tab)
+map("v", "<Tab>", ">gv", { desc = "Indent block" })
+map("v", "<S-Tab>", "<gv", { desc = "Unindent block" })
+
+-- 7. Commenting Toggle
+-- Normal Mode: Toggle current line
+map("n", "<C-_>", "gcc", { remap = true, desc = "Comment: Toggle line" })
+map("n", "<C-/>", "gcc", { remap = true, desc = "Comment: Toggle line" })
+-- Visual Mode: Toggle selection
+map("v", "<C-_>", "gc", { remap = true, desc = "Comment: Toggle selection" })
+map("v", "<C-/>", "gc", { remap = true, desc = "Comment: Toggle selection" })
+
 ---------------------------------------------------------------------
 -- Git integrations
 ---------------------------------------------------------------------
