@@ -27,3 +27,12 @@ require("lazy").setup("plugins")
 require("config.settings")
 require("config.workspaces")
 require("config.keymaps")
+
+-- Automatic start of RPC-server for nvr (Zope External Editor)
+if vim.env.NVIM_LISTEN_ADDRESS then
+  -- Check if server is already running on socket
+  local stat = vim.loop.fs_stat(vim.env.NVIM_LISTEN_ADDRESS)
+  if not stat then
+    vim.fn.serverstart(vim.env.NVIM_LISTEN_ADDRESS)
+  end
+end
