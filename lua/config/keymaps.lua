@@ -302,6 +302,7 @@ if ok_cmp and cmp then
     mapping = {
       ["<C-Space>"] = cmp.mapping.complete(),
       ["<CR>"] = cmp.mapping.confirm({ select = true }),
+      ["<C-e>"] = cmp.mapping.abort(), -- REJECT: Closes menu, stays in Insert mode
       ["<Tab>"] = cmp.mapping(function(fallback)
         if cmp.visible() then
           cmp.select_next_item(select_opts)
