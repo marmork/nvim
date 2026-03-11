@@ -18,11 +18,10 @@ return {
   -- Bufferline: displays all loaded buffers as tabs
     {
       'akinsho/bufferline.nvim',
-      dependencies = { 'nvim-tree/nvim-web-devicons' }, -- Für Icons
+      dependencies = { 'nvim-tree/nvim-web-devicons' },
       version = "*",
       opts = {
           options = {
-              -- Zeigt die Bufferline IMMER an (entspricht showtabline=2)
               show_buffer_close_icons = false,
               separator_style = 'thin', 
           },
