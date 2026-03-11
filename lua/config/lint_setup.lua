@@ -19,11 +19,18 @@ lint.linters.flake8 = {
   },
   stdin = false,
   parser = require("lint.parser").from_pattern(
-    [[^(%S+):(%d+):(%d+): (%w+): (.*)$]],
+    [[^(%S+):(%d+):(%d+): (%w+): (.+)$]],
     { "filename", "lnum", "col", "code", "message" },
     { lnum = tonumber, col = tonumber }
   ),
 }
+
+vim.diagnostic.config({
+  virtual_text = { prefix = "●", spacing = 2, severity = vim.diagnostic.severity.WARN },
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+})
 
 -- 2. SQLFluff (Lower case & 2-space indent)
 lint.linters.sqlfluff.args = {
