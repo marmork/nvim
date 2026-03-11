@@ -5,9 +5,8 @@ require('mason-tool-installer').setup({
     -- List of tools that Mason will ensure are installed locally.
     ensure_installed = {
         -- Formatters (used by conform.nvim)
-        'black',        -- Python formatter
+        'flake8',        -- Python
         'prettier',     -- JS/TS/JSON/Markdown formatter
-        'ruff',         -- Python
         'shfmt',        -- Shell script formatter
         'sqlfluff',     -- SQL formatter
 
