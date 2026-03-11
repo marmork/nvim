@@ -1,34 +1,41 @@
--- lua/config/lint_setup.lua
--- Configuration for nvim-lint. Tools are managed by mason.nvim.
+--- @file lint_setup.lua
+--- @brief Diagnostic engine for real-time code linting.
 
 local lint = require('lint')
 
--- The 'exists' function and associated checks are REMOVED 
--- because Mason handles the installation and pathing for 'shellcheck' and 'sqlfluff'.
+lint.linters_by_ft = {
+  python = { 'flake8' },
+  sh = { 'shellcheck' },
+  sql = { 'sqlfluff' },
+}
 
--- Define linters for filetypes
-local linters_by_ft = {}
+-- 1. Flake8 (Python 80-char alerts)
+lint.linters.flake8 = {
+  cmd = "/home/marcel/.local/share/nvim/mason/bin/flake8",
+  args = {
+    "--isolated",
+    "--max-line-length=80",
+    function() return vim.api.nvim_buf_get_name(0) end,
+  },
+  stdin = false,
+  parser = require("lint.parser").from_pattern(
+    [[^(%S+):(%d+):(%d+): (%w+): (.*)$]],
+    { "filename", "lnum", "col", "code", "message" },
+    { lnum = tonumber, col = tonumber }
+  ),
+}
 
--- Add ruff to python filetypes
-linters_by_ft.python = { 'ruff' }
+-- 2. SQLFluff (Lower case & 2-space indent)
+lint.linters.sqlfluff.args = {
+  "lint",
+  "--format=json",
+  "--dialect=postgres",
+  "-",
+}
 
--- Shellcheck (Now guaranteed by Mason)
-linters_by_ft.sh = { 'shellcheck' }
-
--- SQLFluff (Now guaranteed by Mason)
--- Note: If you have custom arguments (e.g., --dialect postgres) that the built-in
--- linter does not support, you may need a custom linter definition here.
-linters_by_ft.sql = { 'sqlfluff' }
-
--- Apply the configured linters to nvim-lint
-lint.linters_by_ft = linters_by_ft
-
--- Autocommand to run the linters automatically after a file is saved
-vim.api.nvim_create_autocmd({ 'BufWritePost' }, {
-    callback = function()
-        -- Only run the linter if the buffer is active and not an internal buffer (like help)
-        if vim.api.nvim_get_current_win() ~= 0 then
-            require('lint').try_lint()
-        end
-    end,
+-- Triggering
+vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+  callback = function()
+    lint.try_lint()
+  end,
 })
