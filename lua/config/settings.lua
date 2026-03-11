@@ -1,17 +1,51 @@
--- General Neovim options
+--- @file settings.lua
+--- @brief Core Neovim behavior and UI settings.
+---
+--- This file configures:
+--- 1. Global indentation (default 2 spaces).
+--- 2. Python/JS overrides (4 spaces).
+--- 3. Visual guides (ColorColumn at 80).
+--- 4. UI elements (Line numbers, mouse support).
 
+-- 1. Global Defaults
 vim.opt.expandtab = true
 vim.opt.mouse = "a"
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.shiftwidth = 2
-vim.opt.showtabline = 2
 vim.opt.tabstop = 2
+vim.opt.showtabline = 2
+vim.opt.signcolumn = "yes" -- Always show gutter to prevent text "jumping"
 
--- Softwrap for text-based formats (Markdown, TeX, plain text)
--- Applies only to the actual buffer's filetype
+-- 2. FileType Specific Overrides (Python, JS, SQL)
+local ft_group = vim.api.nvim_create_augroup("FileTypeOverrides", { clear = true })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "python", "javascript", "typescript" },
+  group = ft_group,
+  callback = function()
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.tabstop = 4
+    
+    if vim.bo.filetype == "python" then
+      vim.opt_local.colorcolumn = "80"
+      vim.opt_local.spell = false -- No spellcheck in Python code
+    end
+  end,
+})
+
+-- SQL specifically (ensuring it stays at 2 spaces)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "sql",
+  group = ft_group,
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+  end,
+})
+
+-- 3. Softwrap for text-based formats
 local softwrap_group = vim.api.nvim_create_augroup("SoftWrapTextFiles", { clear = true })
-
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "markdown", "text", "tex", "plaintex" },
   group = softwrap_group,
@@ -23,18 +57,11 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Enable soft wrap inside Telescope preview windows.
--- Telescope previewers often use custom buffer/filetypes,
--- so filetype-based autocmds won't catch them.
+-- 4. Telescope Preview Window Behavior
 vim.api.nvim_create_autocmd("User", {
   pattern = "TelescopePreviewerLoaded",
   callback = function(args)
-    -- Defensive check: some Telescope events pass no additional data
-    if not args or not args.data then
-      return
-    end
-
-    -- Always enable softwrap in preview windows (safe and expected behavior)
+    if not args or not args.data then return end
     vim.opt_local.wrap = true
     vim.opt_local.linebreak = true
     vim.opt_local.breakindent = true
