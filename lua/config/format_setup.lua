@@ -2,29 +2,38 @@
 local conform = require("conform")
 
 conform.setup({
+  -- Assign formatters to filetypes
   formatters_by_ft = {
-    python = {
-      {
-        command = "black",
-        args = { "--line-length", "80", "-" },
-        stdin = true,
-      },
-    },
-    javascript = {
-      {
-        command = "prettier",
-        args = { "--stdin-filepath", "$FILENAME", "--tab-width", "4" }
-      }
-    },
+    python = { "black" },  -- you could add "isort" before "black" if needed
+    javascript = { "prettier" },
     typescript = { "prettier" },
     json = { "prettier" },
     markdown = { "prettier" },
     sh = { "shfmt" },
-    sql = {
-      { command = "sqlfluff",
-      args = { "fix", "--dialect", "postgres", "--stdin" }, stdin = true }
+    sql = { "sqlfluff" },
+  },
+
+  -- Define formatter details
+  formatters = {
+    black = {
+      command = "black",
+      stdin = true,
+      prepend_args = { "--line-length", "79" },
+    },
+    prettier = {
+      command = "prettier",
+      stdin = true,
+      prepend_args = { "--stdin-filepath", "$FILENAME", "--tab-width", "4" },
+    },
+    shfmt = { command = "shfmt", stdin = true },
+    sqlfluff = {
+      command = "sqlfluff",
+      stdin = true,
+      prepend_args = { "fix", "--dialect", "postgres", "--stdin" },
     },
   },
 
-  format_on_save = { timeout_ms = 500 },
+  format_on_save = {
+    timeout_ms = 500,
+  },
 })
