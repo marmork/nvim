@@ -18,7 +18,10 @@ conform.setup({
     black = {
       command = "black",
       stdin = true,
-      prepend_args = { "--line-length", "79" },
+      prepend_args = { 
+        "--line-length", "79",
+        "--skip-string-normalization"
+      },
     },
     prettier = {
       command = "prettier",
