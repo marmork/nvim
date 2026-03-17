@@ -4,7 +4,7 @@ local conform = require("conform")
 conform.setup({
   -- Assign formatters to filetypes
   formatters_by_ft = {
-    python = { "black" },  -- you could add "isort" before "black" if needed
+    python = { "ruff_format" },
     javascript = { "prettier" },
     typescript = { "prettier" },
     json = { "prettier" },
@@ -15,12 +15,11 @@ conform.setup({
 
   -- Define formatter details
   formatters = {
-    black = {
-      command = "black",
-      stdin = true,
-      prepend_args = { 
-        "--line-length", "79",
-        "--skip-string-normalization"
+    ruff_format = {
+      prepend_args = {
+        "format",
+        "--line-length", "80",
+        "--quote-style", "preserve", 
       },
     },
     prettier = {
