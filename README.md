@@ -32,18 +32,15 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 |         ├── lint_setup.lua → Configure linter
 |         ├── local_paths.lua → Define paths
 |         ├── settings.lua → Neovim options (tabs, numbers, etc.)
-|         ├── tool_installer → Mason: Define Linters/Formatters to install
 │         ├── workspaces.lua → Writing/Coding mode switching logic
 |    ├──plugins/ → One file per plugin definition
 |         ├── dispatch.lua
 |         ├── editor.lua
+|         ├── format.lua
 |         ├── git.lua
-|         ├── linting.lua
-|         ├── lsp.lua
 |         ├── theme.lua
 |         ├── zettelkasten.lua
 │    └── utils/ → custom helpers or shared functions
-|         ├── editor.lua
 |         ├── pandoc.lua
 |         ├── zettelkasten.lua
 └── lazy-lock.json → Version lock for all plugins (auto-generated)
@@ -62,14 +59,17 @@ sudo apt install -y \
   nodejs npm \
   python3 python3-pip python-is-python3 \
   pipx \
-  ripgrep fd-find unzip
+  ripgrep fd-find unzip \
+  shfmt
 
 # Set up pipx
 pipx ensurepath
 
-# Manually installed tools (Mason does not manage these, e.g., for LaTeX/Typst)
-pipx install pynvim
+# Manually installed tools
+pipx install black pynvim ruff
+pipx install sqlfluff
 pipx install typst
+
 
 # Node-based tools
 sudo npm install -g tree-sitter-cli
