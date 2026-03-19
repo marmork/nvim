@@ -2,40 +2,56 @@
 local conform = require("conform")
 
 conform.setup({
-  -- Assign formatters to filetypes
+  -- Map filetypes to formatters
   formatters_by_ft = {
-    python = { "ruff_format" },
+    -- For Python, run trim_whitespace first, then black
+    python = { "trim_whitespace", "black" },
     javascript = { "prettier" },
     typescript = { "prettier" },
     json = { "prettier" },
     markdown = { "prettier" },
     sh = { "shfmt" },
     sql = { "sqlfluff" },
+    -- Global fallback for all other filetypes
+    ["*"] = { "trim_whitespace" },
   },
 
-  -- Define formatter details
   formatters = {
-    ruff_format = {
-      prepend_args = {
-        "format",
+    black = {
+      command = "black",
+      -- Using --stdin-filename as required by your local black version
+      args = {
+        "--stdin-filename", "$FILENAME",
         "--line-length", "80",
-        "--quote-style", "preserve", 
+        "--skip-string-normalization", -- Keeps your single quotes
+        "-",
+      },
+    },
+    sqlfluff = {
+      command = "sqlfluff",
+      -- Ensure sqlfluff runs even if no .sqlfluff or .git directory is found
+      require_cwd = false,
+      args = {
+        "fix",
+        "--dialect", "postgres",
+        "--force", -- Prevents interactive prompts
+        "-",
       },
     },
     prettier = {
-      command = "prettier",
-      stdin = true,
-      prepend_args = { "--stdin-filepath", "$FILENAME", "--tab-width", "4" },
-    },
-    shfmt = { command = "shfmt", stdin = true },
-    sqlfluff = {
-      command = "sqlfluff",
-      stdin = true,
-      prepend_args = { "fix", "--dialect", "postgres", "--stdin" },
+      -- Ensure prettier is installed via npm install -g table (if needed)
+      condition = function(self, ctx)
+        return vim.fs.find(
+          { ".prettierrc", "package.json" },
+          { path = ctx.filename, upward = true }
+        )[1]
+      end,
     },
   },
 
   format_on_save = {
-    timeout_ms = 500,
+    -- Increased timeout to ensure slower formatters don't hang
+    timeout_ms = 2000,
+    lsp_fallback = false,
   },
 })
