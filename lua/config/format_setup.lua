@@ -39,12 +39,12 @@ conform.setup({
       },
     },
     prettier = {
-      command = "prettier",
-      args = { 
-        "--stdin-filepath", "$FILENAME", 
+      command = os.getenv("HOME") .. "/.npm-global/bin/prettier",
+      args = {
+        "--stdin-filepath", "$FILENAME",
         "--single-quote", "true",
         "--tab-width", "4",
-        "--trailing-comma", "none" 
+        "--trailing-comma", "none",
       },
     },
   },
