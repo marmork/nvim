@@ -69,10 +69,21 @@ pipx ensurepath
 pipx install black pynvim ruff
 pipx install sqlfluff
 pipx install typst
+```
 
-
-# Node-based tools
-sudo npm install -g tree-sitter-cli
+Setup node in user home directory and install required packages
+```bash
+mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+nano ~/.config/fish/config.fish
+```
+Add the following line to your Fish configuration:
+```
+# Add local npm-global binaries to PATH
+set -gx PATH $HOME/.npm-global/bin $PATH
+```
+Apply configuration changes with: `source ~/.config/fish/config.fish`.
+Install the following packages: `npm install -g prettier tree-sitter-cli`
 ```
 
 ## 🚀 Installation
