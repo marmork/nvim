@@ -36,3 +36,15 @@ if vim.env.NVIM_LISTEN_ADDRESS then
     vim.fn.serverstart(vim.env.NVIM_LISTEN_ADDRESS)
   end
 end
+
+-- Global Diagnostic Settings
+vim.diagnostic.config({
+  virtual_text = {
+    prefix = '●', -- Small dot before the error text
+    spacing = 4,
+  },
+  signs = true,        -- Show icons in the gutter (left side)
+  underline = true,    -- Underline the error in the code
+  update_in_insert = true, -- Shows errors while typing!
+  severity_sort = true,
+})
