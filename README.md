@@ -83,7 +83,7 @@ Add the following line to your Fish configuration:
 set -gx PATH $HOME/.npm-global/bin $PATH
 ```
 Apply configuration changes with: `source ~/.config/fish/config.fish`.
-Install the following packages: `npm install -g prettier tree-sitter-cli`
+Install the following packages: `npm install -g eslint prettier tree-sitter-cli`
 ```
 
 ## 🚀 Installation
