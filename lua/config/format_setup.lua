@@ -39,13 +39,13 @@ conform.setup({
       },
     },
     prettier = {
-      -- Ensure prettier is installed via npm install -g table (if needed)
-      condition = function(self, ctx)
-        return vim.fs.find(
-          { ".prettierrc", "package.json" },
-          { path = ctx.filename, upward = true }
-        )[1]
-      end,
+      command = "prettier",
+      args = { 
+        "--stdin-filepath", "$FILENAME", 
+        "--single-quote", "true",
+        "--tab-width", "4",
+        "--trailing-comma", "none" 
+      },
     },
   },
 
