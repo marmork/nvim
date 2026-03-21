@@ -20,17 +20,32 @@ vim.opt.signcolumn = "yes" -- Always show gutter to prevent text "jumping"
 -- 2. FileType Specific Overrides (Python, JS, SQL)
 local ft_group = vim.api.nvim_create_augroup("FileTypeOverrides", { clear = true })
 
+-- Python
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "python", "javascript", "typescript" },
+  pattern = "python",
   group = ft_group,
   callback = function()
     vim.opt_local.shiftwidth = 4
     vim.opt_local.tabstop = 4
-    
-    if vim.bo.filetype == "python" then
-      vim.opt_local.colorcolumn = "80"
-      vim.opt_local.spell = false -- No spellcheck in Python code
-    end
+    vim.opt_local.expandtab = true
+
+    vim.opt_local.colorcolumn = "80"
+    vim.opt_local.autoindent = true
+    vim.opt_local.smartindent = false
+    vim.opt_local.cindent = false
+  end,
+})
+
+-- JS / TS
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "javascript", "typescript" },
+  group = ft_group,
+  callback = function()
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.tabstop = 4
+    vim.opt_local.expandtab = true
+
+    -- KEIN colorcolumn → Prettier regelt das
   end,
 })
 
