@@ -7,16 +7,14 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 
 ## ⚙️ Features
 
+✅ **AI-Powered Development** (Local Ollama + CodeCompanion)
 ✅ Two dedicated work modes:
-
 - **Writing Mode** (`<leader>ws`) → switches to `~/Documents/Writing`
 - **Coding Mode** (`<leader>wc`) → switches to `~/repos`
 
-✅ Key tools included:
-
-- Modern UI (Gruvbox theme, nvim-tree, Telescope)
-- Built-in LSP, linting, and formatting
-- Automatic formatting on save
+✅ **Modern UI** (Gruvbox theme, nvim-tree, Telescope)
+✅ **Zettelkasten Integration** (Telekasten & Zotero)
+✅ **Built-in LSP, linting, and formatting** (Auto-format on save)
 
 ---
 
@@ -34,6 +32,7 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 |         ├── settings.lua → Neovim options (tabs, numbers, etc.)
 │         ├── workspaces.lua → Writing/Coding mode switching logic
 |    ├──plugins/ → One file per plugin definition
+|         ├── ai.lua → CodeCompanion & Ollama config
 |         ├── dispatch.lua
 |         ├── editor.lua
 |         ├── format.lua
@@ -59,25 +58,17 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 Install the base tools and dependencies:
 
 ```bash
-sudo apt update
-sudo apt install -y \
-  curl git luarocks neovim \
-  nodejs npm \
-  python3 python3-pip python-is-python3 \
-  pipx \
-  ripgrep fd-find unzip \
-  shfmt
+sudo apt update && sudo apt install -y \
+  build-essential cmake curl git neovim nodejs npm pipx ripgrep fd-find unzip shfmt rocminfo
 
 # Set up pipx
 pipx ensurepath
 
 # Manually installed tools
-pipx install black pynvim ruff
-pipx install sqlfluff
-pipx install typst
+pipx install black pynvim ruff sqlfluff typst
 ```
 
-Setup node in user home directory and install required packages
+Setup node in user home directory and install required packages:
 ```bash
 mkdir -p ~/.npm-global
 npm config set prefix '~/.npm-global'
@@ -90,25 +81,19 @@ set -gx PATH $HOME/.npm-global/bin $PATH
 ```
 Apply configuration changes with: `source ~/.config/fish/config.fish`.
 Install the following packages: `npm install -g eslint prettier tree-sitter-cli`
-```
 
 ## 🚀 Installation
 
-If you previously had another Neovim configuration or are experiencing plugin issues, it is best to start with a clean slate by removing old data and cache folders:
+### 1. Clean state
 
-```bash
-rm -rf ~/.local/share/nvim
-rm -rf ~/.cache/nvim
-rm -rf ~/.local/state/nvim
-```
+If you are experiencing plugin issues, remove old data: `rm -rf ~/.local/share/nvim ~/.cache/nvim ~/.local/state/nvim`.
 
-### 1. Base installation
+### 2. Base installation
 
-1. First, the basics must be installed with `sudo apt install build-essential cmake`.
-2. Clone this repository into your Neovim configuration directory: `git clone https://github.com/marmork/nvim.git ~/.config/nvim`.
-3. Then, the [official installation instructions](https://github.com/neovim/neovim/blob/master/BUILD.md) can be followed.
+1. Clone this repository into your Neovim configuration directory: `git clone https://github.com/marmork/nvim.git ~/.config/nvim`.
+2. Then, the [official installation instructions](https://github.com/neovim/neovim/blob/master/BUILD.md) can be followed.
 
-### 2. First-time setup (required)
+### 3. First-time setup (required)
 
 Since paths (like your Documents or Research folders) differ between machines, you must create a local configuration file. This file is ignored by Git to keep your setup portable.
 
@@ -116,7 +101,7 @@ Since paths (like your Documents or Research folders) differ between machines, y
 - Copy the example configuration: `cp local_paths-example.lua local_paths.lua`
 - Edit local_paths.lua and fill in your specific system paths!
 
-### 3. Initialize plugins
+### 4. Initialize plugins
 
 Start Neovim: `nvim`. Lazy.nvim will start automatically and begin downloading all required plugins.
 
@@ -124,9 +109,81 @@ Start Neovim: `nvim`. Lazy.nvim will start automatically and begin downloading a
 - Once finished, you can close the UI by pressing q.
 - Restart Neovim once to ensure all plugins and LSPs are correctly loaded.
 
-### 4. [Neovim update](#neovim-update)
+### 5. [Neovim update](#neovim-update)
 
 To prevent the difference between Neovim and your individual configuration from becoming too large, you should update your Neovim installation every few weeks (at least every two months). This works as follows: Run `chmod +x update_nvim.sh` once and update with `./update_nvim.sh`. Then start Neovim and perform a `:Lazy update` to syncronize your plugins.
+
+## 🤖 AI & Local LLM Setup (Ollama)
+
+This configuration uses **CodeCompanion.nvim** to talk to a local **Ollama** instance. This ensures your code stays private and works offline.
+
+### 1. Hardware-Accelerated Hosting (AMD Ryzen APU)
+
+Optimized for **Ryzen 7 7730U** with Shared VRAM using the Vulkan-Bypass for stability.
+
+**Setup Steps:**
+1. Install Ollama: `curl -fsSL https://ollama.com/install.sh | sh`
+2. Set Permissions:
+   ```bash
+   sudo usermod -a -G video,render ollama
+   sudo usermod -a -G video,render $USER
+   ```
+3. Force Vulkan Mode (Systemd Override): `sudo systemctl edit ollama.service`
+4. Add the following block:
+   ```ini
+   [Service]
+   Environment="OLLAMA_VULKAN=1"
+   ```
+5. Restart service: `sudo systemctl daemon-reload && sudo systemctl restart ollama`
+
+### 2. Recommended Models
+
+```bash
+ollama pull qwen2.5-coder:7b 
+ollama pull deepseek-coder-v2:16b-lite-instruct-q4_K_M
+ollama pull mistral-nemo
+```
+
+### 3. Shell integration (Fish)
+
+Add these to your ~/.config/fish/config.fish for quick access:
+```bash
+# AI & LLM (Ollama)
+# Aliases for direct terminal chat
+alias qwen="ollama run qwen2.5-coder:7b"
+alias qfast="ollama run qwen2.5-coder:1.5b"
+alias deepseek="ollama run deepseek-coder-v2:16b-lite-instruct-q4_K_M"
+alias mistral="ollama run mistral-nemo"
+
+# AI Quick Query Funktion
+function ask --description 'Ask Ollama (Default: qwen). Aliases: q, ds, m'
+    set -l model_alias $argv[1]
+    set -l final_model "qwen2.5-coder:7b"
+
+    switch $model_alias
+        case 'q' 'qwen'
+            set final_model "qwen2.5-coder:7b"
+            set -e argv[1]
+        case 'ds' 'deep' 'deepseek'
+            set final_model "deepseek-coder-v2:16b-lite-instruct-q4_K_M"
+            set -e argv[1]
+        case 'm' 'mistral'
+            set final_model "mistral-nemo"
+            set -e argv[1]
+        case 'qf' 'qfast'
+            set final_model "qwen2.5-coder:1.5b"
+            set -e argv[1]
+    end
+
+    if test (count $argv) -gt 0
+        echo "using model: $final_model..."
+        ollama run $final_model "$argv"
+    else
+        echo "Usage: ask [q|ds|m] 'Deine Frage'"
+        echo "Beispiel: ask ds 'Schreibe ein komplexes Python Skript...'"
+    end
+end
+```
 
 ## 🧭 Usage
 
