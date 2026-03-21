@@ -11,8 +11,18 @@ conform.setup({
   -- Map filetypes to formatters
   formatters_by_ft = {
     python = { "black" },
-    javascript = { "prettier" },
-    typescript = { "prettier" },
+    javascript = function()
+      if is_zope_file() then
+        return { "trim_whitespace" }
+      end
+      return { "prettier" }
+    end,
+    typescript = function()
+      if is_zope_file() then
+        return { "trim_whitespace" }
+      end
+      return { "prettier" }
+    end,
     json = { "prettier" },
     markdown = { "prettier" },
     sh = { "shfmt" },
@@ -37,7 +47,6 @@ conform.setup({
     },
     sqlfluff = {
       command = "sqlfluff",
-      -- Ensure sqlfluff runs even if no .sqlfluff or .git directory is found
       require_cwd = false,
       args = {
         "fix",
@@ -48,17 +57,7 @@ conform.setup({
     },
     prettier = {
       command = os.getenv("HOME") .. "/.npm-global/bin/prettier",
-      args = function()
-        local filename = "$FILENAME"
-        local base_args = { "--stdin-filepath", filename }
-
-        if is_zope_file() then
-          table.insert(base_args, "--tab-width")
-          table.insert(base_args, "4")
-        end
-
-        return base_args
-      end,
+      args = { "--stdin-filepath", "$FILENAME" },
     },
   },
 
