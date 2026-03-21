@@ -119,23 +119,27 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    -- Use 'opts' instead of 'config' for better compatibility with newer TS versions
     opts = {
-      ensure_installed = { "bash", "python", "javascript", "typescript", "lua", "markdown", "sql", "latex" },
+      ensure_installed = { 
+        "bash", "python", "javascript", "typescript", "lua", 
+        "markdown", "markdown_inline", "yaml", "sql", "latex",
+        "vim", "vimdoc"
+      },
       highlight = { enable = true },
       indent = { enable = true },
-      -- Note: autotag and textobjects often need their own setup now 
-      -- or are handled via the new internal init
+      -- 1. Tell Treesitter EXACTLY where to install the parsers
+      parser_install_dir = vim.fn.stdpath("data") .. "/parsers",
     },
     config = function(_, opts)
-      -- The new version 1.0.0+ logic:
-      -- We check if the old module exists, otherwise we use the new way
+      -- 2. IMPORTANT: Add the install directory to Neovim's runtime path 
+      -- BEFORE setting up Treesitter, so Neovim can actually find the .so files
+      vim.opt.runtimepath:append(opts.parser_install_dir)
+
       local ok, configs = pcall(require, "nvim-treesitter.configs")
       if ok then
         configs.setup(opts)
       else
-        -- In v1.0.0+, many settings are handled automatically via 'opts'
-        -- if you use a plugin manager like lazy.nvim
+        -- Fallback for newer TS versions
         require("nvim-treesitter").setup(opts)
       end
     end,
