@@ -4,8 +4,7 @@ local conform = require("conform")
 conform.setup({
   -- Map filetypes to formatters
   formatters_by_ft = {
-    -- For Python, run trim_whitespace first, then black
-    python = { "trim_whitespace", "black" },
+    python = { "black" },
     javascript = { "prettier" },
     typescript = { "prettier" },
     json = { "prettier" },
@@ -19,7 +18,6 @@ conform.setup({
   formatters = {
     black = {
       command = "black",
-      -- Using --stdin-filename as required by your local black version
       args = {
         "--stdin-filename", "$FILENAME",
         "--line-length", "80",
