@@ -36,16 +36,23 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- JS / TS
+-- JS / TS dynamic indentation
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "javascript", "typescript" },
   group = ft_group,
   callback = function()
-    vim.opt_local.shiftwidth = 4
-    vim.opt_local.tabstop = 4
-    vim.opt_local.expandtab = true
-
-    -- KEIN colorcolumn → Prettier regelt das
+    local path = vim.api.nvim_buf_get_name(0)
+    if path:match("WebApp") then
+      -- Project-specific: 4 spaces
+      vim.opt_local.shiftwidth = 4
+      vim.opt_local.tabstop = 4
+      vim.opt_local.expandtab = true
+    else
+      -- Default: 2 spaces
+      vim.opt_local.shiftwidth = 2
+      vim.opt_local.tabstop = 2
+      vim.opt_local.expandtab = true
+    end
   end,
 })
 
