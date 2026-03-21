@@ -41,6 +41,11 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 |         ├── lint.lua
 |         ├── theme.lua
 |         ├── zettelkasten.lua
+|    ├──snippets/zope → Various snippet definitions
+|         ├── zope 
+|               ├── package.json
+|               ├── python.json
+|               ├── sql.json
 │    └── utils/ → custom helpers or shared functions
 |         ├── pandoc.lua
 |         ├── zettelkasten.lua

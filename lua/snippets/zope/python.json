@@ -1,0 +1,399 @@
+{
+    "db_dyn_read": {
+        "scope": "python",
+        "prefix": [
+            "dynread"
+        ],
+        "body": [
+            "context.db_dyn_read(",
+            "    table='${1:tablename}',",
+            "    ${2:id}=${3:}",
+            ")"
+        ],
+        "description": [
+            "Loads a data record for the given table and the given id. ",
+            "ID argument can be replaced with another unique column of the table. ",
+            "Unique columns must be passed as a parameter in this case. ",
+            "Returns dictionary with: ",
+            "['success'] Boolean when anything was found, ",
+            "['data'] Contains the found row. ",
+            "Each row contains a dictionary with all columns (fullcolumn name). ",
+            "['msg'] Will contain any error message"
+        ]
+    },
+    "db_dyn_search": {
+        "scope": "python",
+        "prefix": [
+            "dynsearch"
+        ],
+        "body": [
+            "context.db_dyn_search(",
+            "    table='${1:tablename}',",
+            "    columns=['${2:filter_columns}', ],",
+            "    ${2:filter_columns}=${3:},",
+            "    orderby='${1:tablename}_id desc',",
+            ")"
+        ],
+        "description": [
+            "Loads all data records that match the given search criteria. ",
+            "You can also provide an order by statement in pure sql syntax. ",
+            "Pass your columns without the tablename (<table>_<colname>). ",
+            "Returns dictionary with: ",
+            "['success'] Boolean when anything was found, ",
+            "['data'] List of found rows. ",
+            "Each row contains a dictionary with all columns (fullcolumn name). ",
+            "['msg'] Will contain any error message"
+        ]
+    },
+    "db_dyn_delete": {
+        "scope": "python",
+        "prefix": [
+            "dyndelete"
+        ],
+        "body": [
+            "context.db_dyn_delete(",
+            "    table='${1:tablename}',",
+            "    id=$0",
+            ")"
+        ],
+        "description": [
+            "Deletes a data record in the given table with the given id. ",
+            "ID argument can be replaced with another unique column of the table. ",
+            "You can pass all arguments to db_dyn_delte that you cann pass to db_dyn_read. ",
+            "Returns dictionary with: ",
+            "['success'] Boolean on successful deletion ",
+            "['data'] Will contain the deleted id ",
+            "['msg'] Will contain any error message "
+        ]
+    },
+    "db_dyn_edit": {
+        "scope": "python",
+        "prefix": [
+            "dynedit"
+        ],
+        "body": [
+            "context.db_dyn_edit(",
+            "    table='${1:tablename}',",
+            "    columns=['${2:column_used_for_filtering}', '${3:column_to_be_edited}'],",
+            "    columns_unique=['${2:column_used_for_filtering}', ],",
+            "    ${2:column_used_for_filtering}=${4:},",
+            "    ${3:column_to_be_edited}=${5:},",
+            ")"
+        ],
+        "description": [
+            "Insert or update a data record for the given table. ",
+            "Unique columns or an ID must be passed for updating the correct record. ",
+            "Pass your columns for editing with the value that should be set. ",
+            "Pass your columns without the tablename (<table>_<colname>). ",
+            "Returns dictionary with: ",
+            "['success'] Boolean on successful editing, ",
+            "['data'] None when successful although documentation about that seems flaky, ",
+            "['msg'] Will contain any error message"
+        ]
+    },
+    "db_upsert": {
+        "scope": "python",
+        "prefix": [
+            "db_upsert",
+            "upsert",
+            "dbupsert"
+        ],
+        "body": [
+            "context.db_upsert_(",
+            "    tbl='${1:table}',",
+            "    ident=dict(",
+            "        ${1:table}_id=${2:row_id},",
+            "    ),",
+            "    payload=dict(",
+            "        ${3:column_to_be_edited}=${4:value},",
+            "    ),",
+            ")"
+        ],
+        "description": [
+            "Insert or update a data set for the given table.",
+            "Identifying values must be passed via the 'ident' mapping to uniquely match a row.",
+            "Values to be inserted or updated are passed in 'payload'.",
+            "Only columns with full names (e.g. <table>_<column>) are accepted.",
+            "Returns dictionary with:",
+            "['success']: Boolean indicating whether the operation succeeded,",
+            "['errormessage']: String with error details if success is False,",
+            "['src']: The generated SQL query if 'src__' is set,",
+            "['<TBL>_id']: ID of the inserted or updated row"
+        ]
+    },
+    "context_say": {
+        "scope": "python",
+        "prefix": [
+            "say"
+        ],
+        "body": [
+            "context.say(",
+            "    '$TM_FILENAME_BASE-${1:your_marker}',",
+            "    level=5,",
+            "    ${2:variable_to_be_logged}=${2:variable_to_be_logged},",
+            ")"
+        ],
+        "description": [
+            "Create a log message. You can greb for your marker (first argument) in journalctl. ",
+            "Pass your variables to the function for debugging."
+        ]
+    },
+    "context_print": {
+        "scope": "python",
+        "prefix": [
+            "print",
+            "context_print"
+        ],
+        "body": [
+            "context.prt(",
+            "    subpath='${1:path_to_table_folder}',",
+            "    printer_id=${3:printer_id  # Removing this will only show the label on screen},",
+            "    type=${4:'raw'  # Remove this when outputting to screen},",
+            "    ${5:table_uniquecolumn}=${6:}",
+            ")"
+        ],
+        "description": [
+            "Print a label for a data record. ",
+            "The label will be printed for the record that matches the passed unique columns. ",
+            "Usually you should to pass the ID. ",
+            "If argument printer_id is not given the label will only be shown on screen. ",
+            "Set argument type to raw to print actual labels. ",
+            "Remove type argument to show labels on screen."
+        ]
+    },
+    "read_apppref": {
+        "scope": "python",
+        "prefix": "apppref_get",
+        "body": [
+            "context.apppref_get('${1:apppref_key}')"
+        ],
+        "description": "Fetch the value of an application setting."
+    },
+    "translated_popup_message": {
+        "scope": "python",
+        "prefix": "layout_msg_push",
+        "body": [
+            "context.layout_msg_push(context.i18n_translate(",
+            "    '${1:Message to be translated} {${2:variable}}',",
+            "    args={",
+            "        '${2:variable}': ${2:variable},",
+            "    },",
+            "))"
+        ],
+        "description": [
+            "Generates a codesnippet that includes a translation",
+            "with non translated arguments"
+        ]
+    },
+    "i18n_translate": {
+        "scope": "python",
+        "prefix": "i18n_translate",
+        "body": [
+            "context.i18n_translate(",
+            "    '${1:Message to be translated} {${2:variable}}',",
+            "    args={",
+            "        '${2:variable}': ${2:variable},",
+            "    },",
+            ")"
+        ],
+        "description": [
+            "Generates a codesnippet for a generic translation call",
+            "with non translated arguments"
+        ]
+    },
+    "appsession_get": {
+        "scope": "python",
+        "prefix": "appsession_get",
+        "body": [
+            "context.appsession_get('${1:session_key}')"
+        ],
+        "description": "Read the specified key from the users appsession"
+    },
+    "appsession_set": {
+        "scope": "python",
+        "prefix": "appsession_set",
+        "body": [
+            "context.appsession_set('${1:session_key}', ${2:content})"
+        ],
+        "description": [
+            "Write the specified key with the given content",
+            "to the users appsession"
+        ]
+    },
+    "db_collection_get_and_clear": {
+        "scope": "python",
+        "prefix": "db_collection_get_and_clear",
+        "body": [
+            "collection_ids = context.db_collection_get()",
+            "context.db_collection_clear()"
+        ],
+        "description": [
+            "Sample code to collect selected ids from db_collection_get",
+            "and clear said list afterwards"
+        ]
+    },
+    "db_collection_get": {
+        "scope": "python",
+        "prefix": "db_collection_get",
+        "body": [
+            "context.db_collection_get()"
+        ],
+        "description": [
+            "Snippet to read the list of items from the collection mode"
+        ]
+    },
+    "db_collection_clear": {
+        "scope": "python",
+        "prefix": "db_collection_clear",
+        "body": [
+            "context.db_collection_clear()"
+        ],
+        "description": [
+            "Snippet to clear the list of items from the collection mode"
+        ]
+    },
+    "user_has_role": {
+        "scope": "python",
+        "prefix": "user_has_role",
+        "body": [
+            "context.user_has_role(${1:allowed_roles})"
+        ],
+        "description": [
+            "Snippet to check if a user has any role of a given list of roles",
+            "Will return a boolean"
+        ]
+    },
+    "user_roles": {
+        "scope": "python",
+        "prefix": "user_roles",
+        "body": [
+            "context.user_roles()"
+        ],
+        "description": [
+            "Snippet to fetch the list of roles of a given user"
+        ]
+    },
+    "workflow_get_value": {
+        "scope": "python",
+        "prefix": "wf.get_value",
+        "body": [
+            "wf.get_value('${1:key}')"
+        ],
+        "description": [
+            "Read a value from the workflow session dictionary",
+            "Requires context.workflow to be mapped to wf like is done",
+            "in the standard workflow template script"
+        ]
+    },
+    "workflow_set_value": {
+        "scope": "python",
+        "prefix": "wf.set",
+        "body": [
+            "wf.set('${1:key}', ${2:value})"
+        ],
+        "description": [
+            "Write a value to the workflow session dictionary",
+            "Requires context.workflow to be mapped to wf like is done",
+            "in the standard workflow template script"
+        ]
+    },
+    "workflow_template": {
+        "scope": "python",
+        "prefix": "template_workflow",
+        "body": [
+            "req = context.REQUEST",
+            "wf = context.workflow",
+            "state = wf.state()",
+            "",
+            "result = {",
+            "    'state': state,",
+            "    'success': False,",
+            "    'msg': '',",
+            "    'value': None,",
+            "}"
+        ],
+        "description": [
+            "Template for starting a workflow step in scanner workflow"
+        ]
+    },
+    "reclist_config_template": {
+        "scope": "python",
+        "prefix": "reclist_config",
+        "body": [
+            "return {",
+            "    'columns': [",
+            "    ],",
+            "    'columns_external': [",
+            "    ],",
+            "    'aliases': {",
+            "    },",
+            "}"
+        ],
+        "description": [
+            "Template for a reclist_config file"
+        ]
+    },
+    "workflow_stack_push": {
+        "scope": "python",
+        "prefix": "workflow_stack_push",
+        "body": [
+            "target_url = context.${1:target}.layout_url(include_host=False)",
+            "args = {",
+            "    '_zoom': {",
+            "        '${2:variable}': ${2:variable},",
+            "    },",
+            "}",
+            "",
+            "wf.stack_push(",
+            "    args=args,",
+            "    target_url=target_url,",
+            "    masked=${3:False},",
+            "    cmd='${4:target_cmd}',",
+            ")"
+        ],
+        "description": [
+            "Insert a snippet for jumping to a different workflow"
+        ]
+    },
+    "appassign_create_execute": {
+        "scope": "python",
+        "prefix": "appassign_create_execute",
+        "body": [
+            "context.logic_d.EMA.AppAssign.create.execute(",
+            "    role='AssignWorker',",
+            "    desc='${1:description}',",
+            "    url='${2:script_url}',",
+            "    session={",
+            "        '${3:session_vars}': ${3:session_vars}",
+            "    }",
+            ")"
+        ],
+        "description": [
+            "Insert snippet for creating and immediately",
+            "running an assignment. Keep in mind the assignment is only",
+            "started after finishing the current transaction"
+        ]
+    },
+    "lcc_transition": {
+        "scope": "python",
+        "prefix": [
+            "lcc_transition",
+            "context.lcc_d.transition",
+            "transition",
+            "lcc_d"
+        ],
+        "body": [
+            "context.lcc_d.transition(",
+            "    table=${1:target_table},",
+            "    id=${1:target_table}_id,",
+            "    lc_id=${2:target_lc_id},",
+            "    url=''",
+            ")"
+        ],
+        "description": [
+            "Autocreate lifecyle transition calls with the most important arguments.",
+            "Returns nothing",
+            "If the url attribute is omitted the user is redirected to ../db_page_edit"
+        ]
+    }
+}

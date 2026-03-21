@@ -1,0 +1,166 @@
+{
+    "db_selfilter_sql": {
+        "scope": "sql",
+        "prefix": "db_selfilter_sql",
+        "body": [
+            "<dtml-sqlgroup where>",
+            "  $0",
+            "<dtml-and>",
+            "  <dtml-var expr=\"db_selfilter_sql('${1:tablename}', '${1:tablename}_id')\">",
+            "</dtml-sqlgroup>"
+        ],
+        "description": "Paste the most common db_selfilter_sql configuration"
+    },
+    "dtml-sqlgroup": {
+        "scope": "sql",
+        "prefix": [
+            "group",
+            "dtml-sqlgroup",
+            "dtml-or",
+            "dtml-and"
+        ],
+        "body": [
+            "<dtml-sqlgroup where>",
+            "  ${1:condition}",
+            "<dtml-or>",
+            "  ${1:condition}",
+            "<dtml-and>",
+            "  ${1:condition}",
+            "</dtml-sqlgroup>"
+        ],
+        "description": "Paste a common dtml-sqlgroup config with additional and/or condition"
+    },
+    "dtml-if": {
+        "scope": "sql",
+        "prefix": [
+            "if",
+            "dtml-if"
+        ],
+        "body": "<dtml-if ${1:condition}>$0</dtml-if>"
+    },
+    "dtml-if-else": {
+        "scope": "sql",
+        "prefix": [
+            "if-else",
+            "dtml-if-else"
+        ],
+        "body": [
+            "<dtml-if ${1:condition}>",
+            "  $0",
+            "<dtml-else>",
+            "  ",
+            "</dtml-if>"
+        ]
+    },
+    "sql_int": {
+        "scope": "sql",
+        "prefix": [
+            "sql_int",
+            "int"
+        ],
+        "body": [
+            "<dtml-var expr=\"sql_int($0)\">"
+        ]
+    },
+    "sql_float": {
+        "scope": "sql",
+        "prefix": [
+            "sql_float",
+            "float"
+        ],
+        "body": [
+            "<dtml-var expr=\"sql_float($0)\">"
+        ]
+    },
+    "sql_string": {
+        "scope": "sql",
+        "prefix": [
+            "sql_string",
+            "string"
+        ],
+        "body": [
+            "<dtml-var expr=\"sql_string($0)\">"
+        ]
+    },
+    "sql_text": {
+        "scope": "sql",
+        "prefix": [
+            "sql_text",
+            "text"
+        ],
+        "body": [
+            "<dtml-var expr=\"sql_text($0)\">"
+        ]
+    },
+    "sql_boolean": {
+        "scope": "sql",
+        "prefix": [
+            "sql_boolean",
+            "boolean"
+        ],
+        "body": [
+            "<dtml-var expr=\"sql_boolean($0)\">"
+        ]
+    },
+    "sql_literal": {
+        "scope": "sql",
+        "prefix": [
+            "sql_literal",
+            "literal"
+        ],
+        "body": [
+            "<dtml-var expr=\"sql_literal($0)\">"
+        ],
+        "description": "Places the given argument within the query without any formating or escaping"
+    },
+    "sql_datetime": {
+        "scope": "sql",
+        "prefix": [
+            "sql_datetime",
+            "datetime",
+            "date",
+            "time"
+        ],
+        "body": [
+            "<dtml-var expr=\"sql_datetime($0)\">"
+        ],
+        "description": "Injects a datetime value into a DTML SQL expression"
+    },
+    "sql_intarray": {
+        "scope": "sql",
+        "prefix": [
+            "sql_intarray",
+            "int",
+            "array"
+        ],
+        "body": [
+            "<dtml-var expr=\"sql_intarray($0)\">"
+        ],
+        "description": "Return null (empty list) or a SQL representation of a bigint array."
+    },
+    "sql_textarray": {
+        "scope": "sql",
+        "prefix": [
+            "sql_textarray",
+            "text",
+            "array"
+        ],
+        "body": [
+            "<dtml-var expr=\"sql_textarray($0)\">"
+        ],
+        "description": "Return null (empty list) or a SQL representation of a string array."
+    },
+    "selview_template": {
+        "scope": "sql",
+        "prefix": "selview",
+        "body": [
+            "create or replace view ${1:tablename}_sel as",
+            "select",
+            "  ${1:tablename}_id as id,",
+            "  $0 as name,",
+            "  false as deleted",
+            "from ${1:tablename}"
+        ],
+        "description": "Print a generic sel view definition."
+    }
+}
