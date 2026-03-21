@@ -38,6 +38,7 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 |         ├── editor.lua
 |         ├── format.lua
 |         ├── git.lua
+|         ├── lint.lua
 |         ├── theme.lua
 |         ├── zettelkasten.lua
 │    └── utils/ → custom helpers or shared functions
