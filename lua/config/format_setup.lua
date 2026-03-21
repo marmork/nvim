@@ -1,13 +1,28 @@
 -- ~/.config/nvim/lua/config/format_setup.lua
 local conform = require("conform")
 
+-- Helper: detect Zope context
+local function is_zope_file()
+  local path = vim.api.nvim_buf_get_name(0)
+  return path:match("WebApp") ~= nil
+end
+
 conform.setup({
   -- Map filetypes to formatters
   formatters_by_ft = {
-    -- For Python, run trim_whitespace first, then black
-    python = { "trim_whitespace", "black" },
-    javascript = { "prettier" },
-    typescript = { "prettier" },
+    python = { "black" },
+    javascript = function()
+      if is_zope_file() then
+        return { "trim_whitespace" }
+      end
+      return { "prettier" }
+    end,
+    typescript = function()
+      if is_zope_file() then
+        return { "trim_whitespace" }
+      end
+      return { "prettier" }
+    end,
     json = { "prettier" },
     markdown = { "prettier" },
     sh = { "shfmt" },
@@ -19,17 +34,19 @@ conform.setup({
   formatters = {
     black = {
       command = "black",
-      -- Using --stdin-filename as required by your local black version
-      args = {
-        "--stdin-filename", "$FILENAME",
-        "--line-length", "80",
-        "--skip-string-normalization", -- Keeps your single quotes
-        "-",
-      },
+      args = function()
+        local filename = "$FILENAME"
+        if is_zope_file() then
+          -- Project-specific: 4 spaces, skip string normalization
+          return { "--stdin-filename", filename, "--line-length", "80", "--skip-string-normalization", "-" }
+        else
+          -- Default Black config
+          return { "--stdin-filename", filename, "-" }
+        end
+      end,
     },
     sqlfluff = {
       command = "sqlfluff",
-      -- Ensure sqlfluff runs even if no .sqlfluff or .git directory is found
       require_cwd = false,
       args = {
         "fix",
@@ -40,12 +57,7 @@ conform.setup({
     },
     prettier = {
       command = os.getenv("HOME") .. "/.npm-global/bin/prettier",
-      args = {
-        "--stdin-filepath", "$FILENAME",
-        "--single-quote", "true",
-        "--tab-width", "4",
-        "--trailing-comma", "none",
-      },
+      args = { "--stdin-filepath", "$FILENAME" },
     },
   },
 
