@@ -1,6 +1,12 @@
 -- ~/.config/nvim/lua/config/format_setup.lua
 local conform = require("conform")
 
+-- Helper: detect Zope context
+local function is_zope_file()
+  local path = vim.api.nvim_buf_get_name(0)
+  return path:match("WebApp") ~= nil
+end
+
 conform.setup({
   -- Map filetypes to formatters
   formatters_by_ft = {
@@ -18,12 +24,16 @@ conform.setup({
   formatters = {
     black = {
       command = "black",
-      args = {
-        "--stdin-filename", "$FILENAME",
-        "--line-length", "80",
-        "--skip-string-normalization", -- Keeps your single quotes
-        "-",
-      },
+      args = function()
+        local filename = "$FILENAME"
+        if is_zope_file() then
+          -- Project-specific: 4 spaces, skip string normalization
+          return { "--stdin-filename", filename, "--line-length", "80", "--skip-string-normalization", "-" }
+        else
+          -- Default Black config
+          return { "--stdin-filename", filename, "-" }
+        end
+      end,
     },
     sqlfluff = {
       command = "sqlfluff",
@@ -38,12 +48,17 @@ conform.setup({
     },
     prettier = {
       command = os.getenv("HOME") .. "/.npm-global/bin/prettier",
-      args = {
-        "--stdin-filepath", "$FILENAME",
-        "--single-quote", "true",
-        "--tab-width", "4",
-        "--trailing-comma", "none",
-      },
+      args = function()
+        local filename = "$FILENAME"
+        local base_args = { "--stdin-filepath", filename }
+
+        if is_zope_file() then
+          table.insert(base_args, "--tab-width")
+          table.insert(base_args, "4")
+        end
+
+        return base_args
+      end,
     },
   },
 
