@@ -247,12 +247,14 @@ nvim
 
 This will rebuild the Lazy environment from scratch.
 
-### 🚨 Troubleshooting (Corrupt Plugins/Submodules)
+### 🚨 Troubleshooting 
+
+#### Corrupt Plugins/Submodules
 
 If you encounter persistent errors related to plugin updates or corrupted Git submodules (e.g., with LuaSnip), a hard reset of the affected plugin folder is required:
 
 1. Close Neovim.
-2. Delete the corrupted plugin folder in the terminal:
+2. Delete the corrupted plugin folder in the terminal, e.g.:
 
 ```bash
 cd ~/.local/share/nvim/lazy
@@ -261,6 +263,17 @@ rm -rf LuaSnip
 
 3. Start Neovim.
 4. Run `:Lazy sync` and press `I` to clone the plugin cleanly again.
+
+#### Treesitter / AI Chat
+
+If the AI chat fails to open with a YAML parser error, Neovim cannot find the compiled parsers. This is fixed by forcing a specific parser directory in `lua/plugins/editor.lua`:
+
+1. Ensure your Treesitter configuration includes:
+   ```lua
+   parser_install_dir = vim.fn.stdpath("data") .. "/parsers",
+   ```
+2. And that this path is added to the runtimepath: `vim.opt.runtimepath:append(vim.fn.stdpath("data") .. "/parsers")`.
+3. Run `:TSInstall! yaml markdown_inline` inside Neovim to force a fresh, correctly linked installation.
 
 ## 👤 Author
 
