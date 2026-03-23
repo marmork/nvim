@@ -139,39 +139,49 @@ Optimized for **Ryzen 7 7730U** with Shared VRAM using the Vulkan-Bypass for sta
 ### 2. Recommended Models
 
 ```bash
+ollama pull qwen3.5:9b
+ollama pull qwen3-coder-next
+ollama pull deepseek-r1:8b
 ollama pull qwen2.5-coder:7b 
-ollama pull deepseek-coder-v2:16b-lite-instruct-q4_K_M
-ollama pull mistral-nemo
 ```
 
 ### 3. Shell integration (Fish)
 
 Add these to your ~/.config/fish/config.fish for quick access:
 ```bash
-# AI & LLM (Ollama)
-# Aliases for direct terminal chat
-alias qwen="ollama run qwen2.5-coder:7b"
-alias qfast="ollama run qwen2.5-coder:1.5b"
-alias deepseek="ollama run deepseek-coder-v2:16b-lite-instruct-q4_K_M"
-alias mistral="ollama run mistral-nemo"
+# AI & LLM (Ollama) - Updated for 2026 Models
+alias qwen='ollama run qwen3.5:9b'
+alias qwennext='ollama run qwen3-coder-next'
+alias deepseek='ollama run deepseek-r1:8b'
+alias qwenold='ollama run qwen2.5-coder:7b'
+
+# Update installed models
+function ollama-update --description 'Update all AI models to latest versions'
+    set -l models qwen3.5:9b qwen3-coder-next deepseek-r1:8b qwen2.5-coder:7b
+    for model in $models
+        echo "Checking for updates: $model..."
+        ollama pull $model
+    end
+    echo "All models are up to date!"
+end
 
 # AI Quick Query Funktion
-function ask --description 'Ask Ollama (Default: qwen). Aliases: q, ds, m'
+function ask --description 'Ask Ollama (Default: qwen3.5),'
     set -l model_alias $argv[1]
-    set -l final_model "qwen2.5-coder:7b"
+    set -l final_model "qwen3.5:9b"
 
     switch $model_alias
         case 'q' 'qwen'
+            set final_model "qwen3.5:9b"
+            set -e argv[1]
+        case 'qnext' 'qwennext'
+            set final_model "qwen3-coder-next"
+            set -e argv[1]
+        case 'deep' 'deepseek'
+            set final_model "deepseek-r1:8b"
+            set -e argv[1]
+        case 'old' 'qwenold'
             set final_model "qwen2.5-coder:7b"
-            set -e argv[1]
-        case 'ds' 'deep' 'deepseek'
-            set final_model "deepseek-coder-v2:16b-lite-instruct-q4_K_M"
-            set -e argv[1]
-        case 'm' 'mistral'
-            set final_model "mistral-nemo"
-            set -e argv[1]
-        case 'qf' 'qfast'
-            set final_model "qwen2.5-coder:1.5b"
             set -e argv[1]
     end
 
@@ -179,8 +189,8 @@ function ask --description 'Ask Ollama (Default: qwen). Aliases: q, ds, m'
         echo "using model: $final_model..."
         ollama run $final_model "$argv"
     else
-        echo "Usage: ask [q|ds|m] 'Deine Frage'"
-        echo "Beispiel: ask ds 'Schreibe ein komplexes Python Skript...'"
+        echo "Usage: ask [q|nxt|r1|old] 'Deine Frage'"
+        echo "Beispiel: ask nxt 'Wie optimiere ich diesen Zope-Loop?'"
     end
 end
 ```

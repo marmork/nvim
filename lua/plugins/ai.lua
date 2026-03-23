@@ -7,33 +7,25 @@ return {
     "hrsh7th/nvim-cmp",
   },
   keys = {
-    -- Toggle the AI chat window
     { "<leader>ca", "<cmd>CodeCompanionChat Toggle<cr>", mode = { "n", "v" }, desc = "AI: Toggle Chat" },
-    -- Open the Action Palette (Explain, Fix, etc.)
     { "<leader>ce", "<cmd>CodeCompanionActions<cr>", mode = { "n", "v" }, desc = "AI: Actions" },
-    -- Add visually selected code to the current chat session
     { "ga", "<cmd>CodeCompanionChat Add<cr>", mode = "v", desc = "AI: Add selection to chat" },
-    -- Interactive inline prompt (rewrites code at cursor)
     { "<leader>ci", "<cmd>CodeCompanion<cr>", mode = "n", desc = "AI: Inline Prompt" },
 
-    -- NEW & WORKING MODEL PICKER:
-    -- This function opens Telescope with your pre-defined models
     {
       "<leader>cm",
       function()
         local opts = require("telescope.themes").get_dropdown({})
         local models = {
+          "qwen3.5:9b",
+          "qwen3-coder-next",
+          "deepseek-r1:8b",
           "qwen2.5-coder:7b",
-          "deepseek-coder-v2:16b-lite-instruct-q4_K_M",
-          "mistral-nemo",
-          "qwen2.5-coder:1.5b",
         }
 
         require("telescope.pickers").new(opts, {
-          prompt_title = "Select AI Model",
-          finder = require("telescope.finders").new_table({
-            results = models,
-          }),
+          prompt_title = "Select AI Model (Next Gen)",
+          finder = require("telescope.finders").new_table({ results = models }),
           sorter = require("telescope.config").values.generic_sorter(opts),
           attach_mappings = function(prompt_bufnr, map)
             local actions = require("telescope.actions")
@@ -43,11 +35,10 @@ return {
               local selection = action_state.get_selected_entry()
               actions.close(prompt_bufnr)
 
-              -- Update the adapter settings globally
               local adapter = require("codecompanion.adapters").resolve("ollama")
               adapter.schema.model.default = selection[1]
               
-              vim.notify("Model switched to: " .. selection[1], vim.log.levels.INFO)
+              vim.notify("Modell gewechselt zu: " .. selection[1], vim.log.levels.INFO)
             end)
             return true
           end,
@@ -60,19 +51,8 @@ return {
   config = function()
     require("codecompanion").setup({
       display = {
-        action_palette = {
-          provider = "telescope",
-          opts = {
-            show_help_code = true,
-          },
-        },
-        chat = {
-          show_settings = true,
-          window = {
-            layout = "vertical",
-            width = 0.4,
-          },
-        },
+        action_palette = { provider = "telescope", opts = { show_help_code = true } },
+        chat = { show_settings = true, window = { layout = "vertical", width = 0.4 } },
       },
       strategies = {
         chat = { adapter = "ollama" },
@@ -85,17 +65,15 @@ return {
             name = "ollama",
             schema = {
               model = {
-                default = "qwen2.5-coder:7b",
+                default = "qwen3.5:9b",
                 choices = {
-                  ["Qwen 2.5 Coder 7B (Default)"] = "qwen2.5-coder:7b",
-                  ["DeepSeek V2 16B (Logic)"] = "deepseek-coder-v2:16b-lite-instruct-q4_K_M",
-                  ["Mistral Nemo 12B (General)"] = "mistral-nemo",
-                  ["Qwen 1.5B (Fast)"] = "qwen2.5-coder:1.5b",
+                  ["Qwen 3.5 (9B)"] = "qwen3.5:9b",
+                  ["Qwen 3 Coder Next (MoE)"] = "qwen3-coder-next",
+                  ["DeepSeek R1 (8B)"] = "deepseek-r1:8b",
+                  ["Qwen 2.5 Coder (7B)"] = "qwen2.5-coder:7b",
                 },
               },
-              num_ctx = {
-                default = 16384,
-              },
+              num_ctx = { default = 32768 },
               num_gpu = { default = 1 },
             },
           })
