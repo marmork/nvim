@@ -43,6 +43,7 @@ return {
 
   keys = {
     { "<leader>ca", "<cmd>CodeCompanionChat Toggle<cr>", mode = { "n", "v" }, desc = "Toggle Chat" },
+    { "<leader>ce", "<cmd>CodeCompanionActions<cr>", mode = { "n", "v" }, desc = "AI Actions" },
     { "ga", "<cmd>CodeCompanionChat Add<cr>", mode = "v", desc = "Add to Chat" },
     { "<leader>cv", function() notify_model() end, mode = "n", desc = "Check AI Model" },
     
@@ -109,11 +110,16 @@ This repository is non-standard:
 
 Rules:
 - Do not touch the "data" subdirectory, or the "__department_paths__" subdirectory.
+- Be concise. 
+- Always provide the full code block for __source__ files.
+- Avoid lengthy explanations unless explicitly asked.
+- When refactoring, output the code immediately.
 
 When implementing TODOs:
 - Prefer extending existing helpers
 - Never introduce new dependencies
 - Match existing SQL style (lowercase keywords)]]
+
               end
               
               return string.format("[Active Model: %s]\n\n%s", current_model, prompt)
