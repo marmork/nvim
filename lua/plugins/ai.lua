@@ -52,10 +52,15 @@ return {
     require("codecompanion").setup({
       display = {
         action_palette = { provider = "telescope", opts = { show_help_code = true } },
-        chat = { show_settings = true, window = { layout = "vertical", width = 0.4 } },
+        chat = { 
+          show_settings = true, 
+          window = { layout = "vertical", width = 0.4 } 
+        },
       },
       strategies = {
-        chat = { adapter = "ollama" },
+        chat = {
+          adapter = "ollama",
+        },
         inline = { adapter = "ollama" },
         agent = { adapter = "ollama" },
       },
