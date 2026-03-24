@@ -52,6 +52,7 @@ conform.setup({
         "fix",
         "--dialect", "postgres",
         "--force", -- Prevents interactive prompts
+        "--config", "indent_unit=2",
         "-",
       },
     },
