@@ -38,7 +38,7 @@ conform.setup({
         local filename = "$FILENAME"
         if is_zope_file() then
           -- Project-specific: 4 spaces, skip string normalization
-          return { "--stdin-filename", filename, "--line-length", "80", "--skip-string-normalization", "-" }
+          return { "--stdin-filename", filename, "--line-length", "79", "--skip-string-normalization", "-" }
         else
           -- Default Black config
           return { "--stdin-filename", filename, "-" }
