@@ -129,7 +129,7 @@
         "body": [
             "context.say(",
             "    '$TM_FILENAME_BASE-${1:your_marker}',",
-            "    level=5,",
+            "    level=1,",
             "    ${2:variable_to_be_logged}=${2:variable_to_be_logged},",
             ")"
         ],
