@@ -4,60 +4,50 @@ local conform = require("conform")
 -- Helper: detect Zope context
 local function is_zope_file()
   local path = vim.api.nvim_buf_get_name(0)
-  return path:match("WebApp") ~= nil
+  return path:match("PerFact") ~= nil
 end
 
 conform.setup({
   -- Map filetypes to formatters
   formatters_by_ft = {
     python = { "black" },
-    javascript = function()
-      if is_zope_file() then
-        return { "trim_whitespace" }
-      end
+    javascript = function(bufnr)
+      if is_zope_file(bufnr) then return { "trim_whitespace" } end
       return { "prettier" }
     end,
-    typescript = function()
-      if is_zope_file() then
-        return { "trim_whitespace" }
-      end
+    typescript = function(bufnr)
+      if is_zope_file(bufnr) then return { "trim_whitespace" } end
       return { "prettier" }
     end,
     json = { "prettier" },
     markdown = { "prettier" },
     sh = { "shfmt" },
     sql = { "sqlfluff" },
-    -- Global fallback for all other filetypes
     ["*"] = { "trim_whitespace" },
   },
 
   formatters = {
     black = {
-      command = "black",
-      args = function()
-        local filename = "$FILENAME"
-        if is_zope_file() then
-          -- Project-specific: 4 spaces, skip string normalization
-          return { "--stdin-filename", filename, "--line-length", "79", "--skip-string-normalization", "-" }
-        else
-          -- Default Black config
-          return { "--stdin-filename", filename, "-" }
+      prepend_args = function(self, bufnr)
+        if is_zope_file(bufnr) then
+          return {
+            "--line-length", "79",
+            "--skip-string-normalization",
+            "--stdin-filename", "$FILENAME",
+          }
         end
+        return { "--stdin-filename", "$FILENAME" }
       end,
     },
     sqlfluff = {
-      command = "sqlfluff",
-      require_cwd = false,
-      args = {
-        "fix",
+       prepend_args = {
         "--dialect", "postgres",
-        "--force", -- Prevents interactive prompts
         "--config", "indent_unit=2",
-        "-",
       },
+      args = { "fix", "--force", "-" },
     },
     prettier = {
-      command = os.getenv("HOME") .. "/.npm-global/bin/prettier",
+      command = vim.fn.expand("$HOME") .. "/.npm-global/bin/prettier",
       args = { "--stdin-filepath", "$FILENAME" },
     },
   },
