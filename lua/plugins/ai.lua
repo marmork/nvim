@@ -89,7 +89,7 @@ return {
               local prompt = "You are a helpful AI assistant."
               
               -- Vollständige Zope-Regeln aus deiner AGENTS.md
-              if path:match("WebApp") or path:match("localhost") or path:match("/tmp/") then
+              if path:match("PerFact") or path:match("localhost") or path:match("/tmp/") then
                 prompt = [[You are an expert for this specific Zope file system mirror system.
 
 This repository is non-standard:

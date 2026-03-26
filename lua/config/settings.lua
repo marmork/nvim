@@ -42,7 +42,7 @@ vim.api.nvim_create_autocmd("FileType", {
   group = ft_group,
   callback = function()
     local path = vim.api.nvim_buf_get_name(0)
-    if path:match("WebApp") then
+    if path:match("PerFact") then
       -- Project-specific: 4 spaces
       vim.opt_local.shiftwidth = 4
       vim.opt_local.tabstop = 4

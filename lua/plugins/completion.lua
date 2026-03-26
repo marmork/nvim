@@ -18,7 +18,7 @@ return {
     local function is_zope_file()
       local path = vim.api.nvim_buf_get_name(0)
       -- Check for common Zope path patterns
-      return path:match("WebApp") ~= nil or 
+      return path:match("PerFact") ~= nil or 
              path:match("localhost") ~= nil or 
              path:match("/tmp/") ~= nil
     end
