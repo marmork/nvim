@@ -1,48 +1,61 @@
 {
-    "db_dyn_read": {
+    "appsession_get": {
         "scope": "python",
-        "prefix": [
-            "dynread"
-        ],
+        "prefix": "appsession_get",
         "body": [
-            "context.db_dyn_read(",
-            "    table='${1:tablename}',",
-            "    ${2:id}=${3:}",
-            ")"
+            "context.appsession_get('${1:session_key}')"
+        ],
+        "description": "Read the specified key from the users appsession"
+    },
+    "appsession_set": {
+        "scope": "python",
+        "prefix": "appsession_set",
+        "body": [
+            "context.appsession_set('${1:session_key}', ${2:content})"
         ],
         "description": [
-            "Loads a data record for the given table and the given id. ",
-            "ID argument can be replaced with another unique column of the table. ",
-            "Unique columns must be passed as a parameter in this case. ",
-            "Returns dictionary with: ",
-            "['success'] Boolean when anything was found, ",
-            "['data'] Contains the found row. ",
-            "Each row contains a dictionary with all columns (fullcolumn name). ",
-            "['msg'] Will contain any error message"
+            "Write the specified key with the given content",
+            "to the users appsession"
         ]
     },
-    "db_dyn_search": {
+    "context_say": {
         "scope": "python",
         "prefix": [
-            "dynsearch"
+            "say"
         ],
         "body": [
-            "context.db_dyn_search(",
-            "    table='${1:tablename}',",
-            "    columns=['${2:filter_columns}', ],",
-            "    ${2:filter_columns}=${3:},",
-            "    orderby='${1:tablename}_id desc',",
+            "context.say(",
+            "    '$TM_FILENAME_BASE-${1:your_marker}',",
+            "    level=1,",
+            "    ${2:variable_to_be_logged}=${2:variable_to_be_logged},",
             ")"
         ],
         "description": [
-            "Loads all data records that match the given search criteria. ",
-            "You can also provide an order by statement in pure sql syntax. ",
-            "Pass your columns without the tablename (<table>_<colname>). ",
-            "Returns dictionary with: ",
-            "['success'] Boolean when anything was found, ",
-            "['data'] List of found rows. ",
-            "Each row contains a dictionary with all columns (fullcolumn name). ",
-            "['msg'] Will contain any error message"
+            "Create a log message. You can greb for your marker (first argument) in journalctl. ",
+            "Pass your variables to the function for debugging."
+        ]
+    },
+    "context_print": {
+        "scope": "python",
+        "prefix": [
+            "print",
+            "context_print"
+        ],
+        "body": [
+            "context.prt(",
+            "    subpath='${1:path_to_table_folder}',",
+            "    printer_id=${3:printer_id  # Removing this will only show the label on screen},",
+            "    type=${4:'raw'  # Remove this when outputting to screen},",
+            "    ${5:table_uniquecolumn}=${6:}",
+            ")"
+        ],
+        "description": [
+            "Print a label for a data record. ",
+            "The label will be printed for the record that matches the passed unique columns. ",
+            "Usually you should to pass the ID. ",
+            "If argument printer_id is not given the label will only be shown on screen. ",
+            "Set argument type to raw to print actual labels. ",
+            "Remove type argument to show labels on screen."
         ]
     },
     "db_dyn_delete": {
@@ -91,6 +104,52 @@
             "['msg'] Will contain any error message"
         ]
     },
+    "db_dyn_read": {
+        "scope": "python",
+        "prefix": [
+            "dynread"
+        ],
+        "body": [
+            "context.db_dyn_read(",
+            "    table='${1:tablename}',",
+            "    ${2:id}=${3:}",
+            ")"
+        ],
+        "description": [
+            "Loads a data record for the given table and the given id. ",
+            "ID argument can be replaced with another unique column of the table. ",
+            "Unique columns must be passed as a parameter in this case. ",
+            "Returns dictionary with: ",
+            "['success'] Boolean when anything was found, ",
+            "['data'] Contains the found row. ",
+            "Each row contains a dictionary with all columns (fullcolumn name). ",
+            "['msg'] Will contain any error message"
+        ]
+    },
+    "db_dyn_search": {
+        "scope": "python",
+        "prefix": [
+            "dynsearch"
+        ],
+        "body": [
+            "context.db_dyn_search(",
+            "    table='${1:tablename}',",
+            "    columns=['${2:filter_columns}', ],",
+            "    ${2:filter_columns}=${3:},",
+            "    orderby='${1:tablename}_id desc',",
+            ")"
+        ],
+        "description": [
+            "Loads all data records that match the given search criteria. ",
+            "You can also provide an order by statement in pure sql syntax. ",
+            "Pass your columns without the tablename (<table>_<colname>). ",
+            "Returns dictionary with: ",
+            "['success'] Boolean when anything was found, ",
+            "['data'] List of found rows. ",
+            "Each row contains a dictionary with all columns (fullcolumn name). ",
+            "['msg'] Will contain any error message"
+        ]
+    },
     "db_upsert": {
         "scope": "python",
         "prefix": [
@@ -119,46 +178,6 @@
             "['errormessage']: String with error details if success is False,",
             "['src']: The generated SQL query if 'src__' is set,",
             "['<TBL>_id']: ID of the inserted or updated row"
-        ]
-    },
-    "context_say": {
-        "scope": "python",
-        "prefix": [
-            "say"
-        ],
-        "body": [
-            "context.say(",
-            "    '$TM_FILENAME_BASE-${1:your_marker}',",
-            "    level=1,",
-            "    ${2:variable_to_be_logged}=${2:variable_to_be_logged},",
-            ")"
-        ],
-        "description": [
-            "Create a log message. You can greb for your marker (first argument) in journalctl. ",
-            "Pass your variables to the function for debugging."
-        ]
-    },
-    "context_print": {
-        "scope": "python",
-        "prefix": [
-            "print",
-            "context_print"
-        ],
-        "body": [
-            "context.prt(",
-            "    subpath='${1:path_to_table_folder}',",
-            "    printer_id=${3:printer_id  # Removing this will only show the label on screen},",
-            "    type=${4:'raw'  # Remove this when outputting to screen},",
-            "    ${5:table_uniquecolumn}=${6:}",
-            ")"
-        ],
-        "description": [
-            "Print a label for a data record. ",
-            "The label will be printed for the record that matches the passed unique columns. ",
-            "Usually you should to pass the ID. ",
-            "If argument printer_id is not given the label will only be shown on screen. ",
-            "Set argument type to raw to print actual labels. ",
-            "Remove type argument to show labels on screen."
         ]
     },
     "read_apppref": {
@@ -199,25 +218,6 @@
         "description": [
             "Generates a codesnippet for a generic translation call",
             "with non translated arguments"
-        ]
-    },
-    "appsession_get": {
-        "scope": "python",
-        "prefix": "appsession_get",
-        "body": [
-            "context.appsession_get('${1:session_key}')"
-        ],
-        "description": "Read the specified key from the users appsession"
-    },
-    "appsession_set": {
-        "scope": "python",
-        "prefix": "appsession_set",
-        "body": [
-            "context.appsession_set('${1:session_key}', ${2:content})"
-        ],
-        "description": [
-            "Write the specified key with the given content",
-            "to the users appsession"
         ]
     },
     "db_collection_get_and_clear": {
