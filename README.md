@@ -139,25 +139,25 @@ Optimized for **Ryzen 7 7730U** with Shared VRAM using the Vulkan-Bypass for sta
 ### 2. Recommended Models
 
 ```bash
+ollama pull qwen2.5-coder:7b
+ollama pull qwen2.5-coder:14b
 ollama pull qwen3.5:9b
-ollama pull qwen3-coder-next
 ollama pull deepseek-r1:8b
-ollama pull qwen2.5-coder:7b 
 ```
 
 ### 3. Shell integration (Fish)
 
 Add these to your ~/.config/fish/config.fish for quick access:
 ```bash
-# AI & LLM (Ollama) - Updated for 2026 Models
+# AI & LLM (Ollama)
+alias qcoder='ollama run qwen2.5-coder:7b'
+alias qbest='ollama run qwen2.5-coder:14b'
 alias qwen='ollama run qwen3.5:9b'
-alias qwennext='ollama run qwen3-coder-next'
-alias deepseek='ollama run deepseek-r1:8b'
-alias qwenold='ollama run qwen2.5-coder:7b'
+alias r1='ollama run deepseek-r1:8b'
 
 # Update installed models
 function ollama-update --description 'Update all AI models to latest versions'
-    set -l models qwen3.5:9b qwen3-coder-next deepseek-r1:8b qwen2.5-coder:7b
+    set -l models qwen2.5-coder:7b qwen2.5-coder:14b qwen3.5:9b deepseek-r1:8b
     for model in $models
         echo "Checking for updates: $model..."
         ollama pull $model
@@ -166,31 +166,31 @@ function ollama-update --description 'Update all AI models to latest versions'
 end
 
 # AI Quick Query Funktion
-function ask --description 'Ask Ollama (Default: qwen3.5),'
+function ask --description 'Ask Ollama'
     set -l model_alias $argv[1]
-    set -l final_model "qwen3.5:9b"
+    set -l final_model "qwen2.5-coder:7b" # Default to fastest coder
 
     switch $model_alias
+        case 'c' 'qcoder'
+            set final_model "qwen2.5-coder:7b"
+            set -e argv[1]
+        case 'b' 'best' 'qbest'
+            set final_model "qwen2.5-coder:14b"
+            set -e argv[1]
         case 'q' 'qwen'
             set final_model "qwen3.5:9b"
             set -e argv[1]
-        case 'qnext' 'qwennext'
-            set final_model "qwen3-coder-next"
-            set -e argv[1]
-        case 'deep' 'deepseek'
+        case 'r1' 'deep' 'deepseek'
             set final_model "deepseek-r1:8b"
-            set -e argv[1]
-        case 'old' 'qwenold'
-            set final_model "qwen2.5-coder:7b"
             set -e argv[1]
     end
 
     if test (count $argv) -gt 0
-        echo "using model: $final_model..."
+        echo "Using model: $final_model..."
         ollama run $final_model "$argv"
     else
-        echo "Usage: ask [q|nxt|r1|old] 'Deine Frage'"
-        echo "Beispiel: ask nxt 'Wie optimiere ich diesen Zope-Loop?'"
+        echo "Usage: ask [c|b|q|r1] 'Deine Frage'"
+        echo "Beispiel: ask c 'Wie optimiere ich diesen Zope-Loop?'"
     end
 end
 ```
