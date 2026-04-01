@@ -32,6 +32,21 @@ local function notify_model()
   vim.notify("󱚣 Active AI: " .. current_model, vim.log.levels.INFO, { title = "CodeCompanion" })
 end
 
+-- Helper to read AGENTS.md from the project root
+local function get_agents_prompt()
+  local root = vim.fs.dirname(vim.fs.find({ "AGENTS.md", ".git" }, { upward = true })[1])
+  if root then
+    local agents_file = root .. "/AGENTS.md"
+    local f = io.open(agents_file, "r")
+    if f then
+      local content = f:read("*a")
+      f:close()
+      return content
+    end
+  end
+  return nil
+end
+
 return {
   "olimorris/codecompanion.nvim",
   dependencies = {
@@ -85,44 +100,19 @@ return {
           adapter = "ollama",
           opts = {
             system_prompt = function()
-              local path = vim.api.nvim_buf_get_name(0)
-              local prompt = "You are a helpful AI assistant."
+              local agents_rules = get_agents_prompt()
               
-              -- Vollständige Zope-Regeln aus deiner AGENTS.md
-              if path:match("PerFact") or path:match("localhost") or path:match("/tmp/") then
-                prompt = [[You are an expert for this specific Zope file system mirror system.
-
-This repository is non-standard:
-- Code lives in subdirectory __root__
-- The directory __root__ is a file system mirror of a Zope ZODB.
-- Each directory in __root__ corresponds to an object in the ZODB.
-- Each such directory represents an "instance" of a Zope Product.
-- The __meta__ file in each directory contains a Python representation of a "meta" dictionary as key-value tuples.
-- The "meta" dictionary describes which Zope Product this "instance" instantiates, in the key "type", e.g. "Z SQL Method".
-- The "meta" dictionary also contains Properties (for PropertyManager classes) in the key "props".
-- The "meta" dictionary also contains the "title" property (class SimpleItem) in the key "title".
-- For ObjectManager subclasses (e.g. type "Folder"), the directories may contain subdirectories (contained objects).
-- The main contents of the object are placed in a file __source__ with the appropriate extension (e.g. ".py", ".css").
-- "Script (Python)" objects contain the function body only, without the "def functionname", and outdented one level.
-- "Script (Python)" objects have the function arguments placed in the "args" key of the "meta" dictionary.
-- "Script (Python)" objects have namespace bindings in the key "bindings" of the "meta" dictionary.
-- "Page Templates" use the TAL and METAL XML namespaces for templating with chameleon
-
-Rules:
-- Do not touch the "data" subdirectory, or the "__department_paths__" subdirectory.
-- Be concise. 
-- Always provide the full code block for __source__ files.
-- Avoid lengthy explanations unless explicitly asked.
-- When refactoring, output the code immediately.
-
-When implementing TODOs:
-- Prefer extending existing helpers
-- Never introduce new dependencies
-- Match existing SQL style (lowercase keywords)]]
-
+              if agents_rules then
+                -- Use the instructions directly from your repo's AGENTS.md
+                return string.format(
+                  "[Active Model: %s]\n\n%s",
+                  current_model,
+                  agents_rules
+                )
+              else
+                -- Fallback for non-Zope projects
+                return "You are a helpful AI assistant."
               end
-              
-              return string.format("[Active Model: %s]\n\n%s", current_model, prompt)
             end,
           },
         },
@@ -138,7 +128,7 @@ When implementing TODOs:
                   return current_model
                 end,
               },
-              num_ctx = { default = 32768 },
+              num_ctx = { default = 24576 },
             },
           })
         end,
