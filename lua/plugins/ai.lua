@@ -2,14 +2,24 @@
 
 local model_file = vim.fn.stdpath("data") .. "/codecompanion_model"
 
+local models = {
+  "qwen2.5-coder:7b",
+  "qwen2.5-coder:14b",
+  "qwen3.5:9b",
+  "deepseek-r1:8b",
+}
+
 local function load_model()
   local f = io.open(model_file, "r")
   if f then
     local m = f:read("*l")
     f:close()
-    if m and m ~= "" then return m end
+    -- Only return if the saved model is still in our active list
+    for _, model in ipairs(models) do
+      if m == model then return m end
+    end
   end
-  return "qwen3.5:9b"
+  return "qwen2.5-coder:7b" -- Reliable fallback
 end
 
 local function save_model(model)
@@ -21,15 +31,9 @@ local function save_model(model)
 end
 
 local current_model = load_model()
-local models = {
-  "qwen3.5:9b",
-  "qwen3-coder-next",
-  "deepseek-r1:8b",
-  "qwen2.5-coder:7b",
-}
 
 local function notify_model()
-  vim.notify("󱚣 Active AI: " .. current_model, vim.log.levels.INFO, { title = "CodeCompanion" })
+  vim.notify("Active AI: " .. current_model, vim.log.levels.INFO, { title = "CodeCompanion" })
 end
 
 -- Helper to read AGENTS.md from the project root
@@ -59,6 +63,7 @@ return {
   keys = {
     { "<leader>ca", "<cmd>CodeCompanionChat Toggle<cr>", mode = { "n", "v" }, desc = "Toggle Chat" },
     { "<leader>ce", "<cmd>CodeCompanionActions<cr>", mode = { "n", "v" }, desc = "AI Actions" },
+    { "<leader>cf", "<cmd>%CodeCompanionChat Add<cr>", desc = "Add file to chat" },
     { "ga", "<cmd>CodeCompanionChat Add<cr>", mode = "v", desc = "Add to Chat" },
     { "<leader>cv", function() notify_model() end, mode = "n", desc = "Check AI Model" },
     
@@ -67,7 +72,6 @@ return {
       function()
         local actions = require("telescope.actions")
         local action_state = require("telescope.actions.state")
-
         require("telescope.pickers").new(require("telescope.themes").get_dropdown({}), {
           prompt_title = "Select AI Model",
           finder = require("telescope.finders").new_table({ results = models }),
@@ -76,13 +80,10 @@ return {
             actions.select_default:replace(function()
               local selection = action_state.get_selected_entry()
               actions.close(prompt_bufnr)
-              
               current_model = selection[1]
               save_model(current_model)
               notify_model()
-              
-              -- Hinweis: Bestehende Chats behalten oft ihr Modell. 
-              -- Für das neue Modell einfach einen neuen Chat öffnen.
+              require("codecompanion").setup() 
             end)
             return true
           end,
