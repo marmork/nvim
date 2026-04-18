@@ -1,24 +1,22 @@
-# 🧠 Neovim Configuration – Writing & Coding Setup
+# Neovim Configuration – Writing & Coding Setup
 
 This repository contains my personal **Neovim configuration** for both **writing** and **software development**.  
 It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and follows a modular structure for maintainability.
 
 ---
 
-## ⚙️ Features
+## Features
 
-✅ **AI-Powered Development** (Local Ollama + CodeCompanion)
-✅ Two dedicated work modes:
-- **Writing Mode** (`<leader>ws`) → switches to `~/Documents/Writing`
-- **Coding Mode** (`<leader>wc`) → switches to `~/repos`
-
-✅ **Modern UI** (Gruvbox theme, nvim-tree, Telescope)
-✅ **Zettelkasten Integration** (Telekasten & Zotero)
-✅ **Built-in LSP, linting, and formatting** (Auto-format on save)
+Two dedicated work modes:
+- **Writing Mode** (`<leader>ws`) → switches to `~/Documents/Writing`  
+- **Coding Mode** (`<leader>wc`) → switches to `~/repos`  
+- **Modern UI** (Gruvbox theme, nvim-tree, Telescope)  
+- **Zettelkasten Integration** (Telekasten & Zotero)  
+- **Built-in LSP, linting, and formatting** (Auto-format on save)  
 
 ---
 
-## 🧩 Folder Structure
+## Folder Structure
 
 ```
 ~/.config/nvim/
@@ -53,9 +51,9 @@ It is built on **Neovim ≥ 0.10**, uses **lazy.nvim** as a plugin manager, and 
 
 ---
 
-## 🧰 Prerequisites (Debian/Ubuntu)
+## Prerequisites (Debian/Ubuntu)
 
-Install the base tools and dependencies:
+Install the base tools and dependencies:  
 
 ```bash
 sudo apt update && sudo apt install -y \
@@ -74,15 +72,18 @@ mkdir -p ~/.npm-global
 npm config set prefix '~/.npm-global'
 nano ~/.config/fish/config.fish
 ```
-Add the following line to your Fish configuration:
+
+Add the following line to your Fish configuration:  
+
 ```
 # Add local npm-global binaries to PATH
 set -gx PATH $HOME/.npm-global/bin $PATH
 ```
-Apply configuration changes with: `source ~/.config/fish/config.fish`.
-Install the following packages: `npm install -g eslint prettier tree-sitter-cli`
 
-## 🚀 Installation
+Apply configuration changes with: `source ~/.config/fish/config.fish`.  
+Install the following packages: `npm install -g eslint prettier tree-sitter-cli`.  
+
+## Installation
 
 ### 1. Clean state
 
@@ -97,44 +98,45 @@ If you are experiencing plugin issues, remove old data: `rm -rf ~/.local/share/n
 
 Since paths (like your Documents or Research folders) differ between machines, you must create a local configuration file. This file is ignored by Git to keep your setup portable.
 
-- Navigate to the config directory: `cd ~/.config/nvim/lua/config/`
-- Copy the example configuration: `cp local_paths-example.lua local_paths.lua`
-- Edit local_paths.lua and fill in your specific system paths!
+- Navigate to the config directory: `cd ~/.config/nvim/lua/config/`  
+- Copy the example configuration: `cp local_paths-example.lua local_paths.lua`  
+- Edit local_paths.lua and fill in your specific system paths!  
 
 ### 4. Initialize plugins
 
-Start Neovim: `nvim`. Lazy.nvim will start automatically and begin downloading all required plugins.
+Start Neovim: `nvim`. Lazy.nvim will start automatically and begin downloading all required plugins.  
 
-- Wait for the process to finish (a UI will show the progress).
-- Once finished, you can close the UI by pressing q.
-- Restart Neovim once to ensure all plugins and LSPs are correctly loaded.
+- Wait for the process to finish (a UI will show the progress).  
+- Once finished, you can close the UI by pressing q.  
+- Restart Neovim once to ensure all plugins and LSPs are correctly loaded.  
 
 ### 5. [Neovim update](#neovim-update)
 
-To prevent the difference between Neovim and your individual configuration from becoming too large, you should update your Neovim installation every few weeks (at least every two months). This works as follows: Run `chmod +x update_nvim.sh` once and update with `./update_nvim.sh`. Then start Neovim and perform a `:Lazy update` to syncronize your plugins.
+To prevent the difference between Neovim and your individual configuration from becoming too large, you should update your Neovim installation every few weeks (at least every two months). This works as follows: Run `chmod +x update_nvim.sh` once and update with `./update_nvim.sh`. Then start Neovim and perform a `:Lazy update` to syncronize your plugins.  
 
-## 🤖 AI & Local LLM Setup (Ollama)
+## AI & Local LLM Setup (Ollama)
 
-This configuration uses **CodeCompanion.nvim** to talk to a local **Ollama** instance. This ensures your code stays private and works offline.
+This configuration uses **CodeCompanion.nvim** to talk to a local **Ollama** instance. This ensures your code stays private and works offline.  
 
 ### 1. Hardware-Accelerated Hosting (AMD Ryzen APU)
 
-Optimized for **Ryzen 7 7730U** with Shared VRAM using the Vulkan-Bypass for stability.
+Optimized for **Ryzen 7 7730U** with Shared VRAM using the Vulkan-Bypass for stability.  
 
-**Setup Steps:**
-1. Install Ollama: `curl -fsSL https://ollama.com/install.sh | sh`
-2. Set Permissions:
+**Setup Steps:**  
+
+1. Install Ollama: `curl -fsSL https://ollama.com/install.sh | sh`  
+2. Set Permissions:  
    ```bash
    sudo usermod -a -G video,render ollama
    sudo usermod -a -G video,render $USER
    ```
-3. Force Vulkan Mode (Systemd Override): `sudo systemctl edit ollama.service`
-4. Add the following block:
+3. Force Vulkan Mode (Systemd Override): `sudo systemctl edit ollama.service`  
+4. Add the following block:  
    ```ini
    [Service]
    Environment="OLLAMA_VULKAN=1"
    ```
-5. Restart service: `sudo systemctl daemon-reload && sudo systemctl restart ollama`
+5. Restart service: `sudo systemctl daemon-reload && sudo systemctl restart ollama`  
 
 ### 2. Recommended Models
 
@@ -147,7 +149,8 @@ ollama pull deepseek-r1:8b
 
 ### 3. Shell integration (Fish)
 
-Add these to your ~/.config/fish/config.fish for quick access:
+Add these to your ~/.config/fish/config.fish for quick access:  
+
 ```bash
 # AI & LLM (Ollama)
 alias qcoder='ollama run qwen2.5-coder:7b'
@@ -195,58 +198,56 @@ function ask --description 'Ask Ollama'
 end
 ```
 
-## 🧭 Usage
+## Usage
 
-🖋️ Writing & Coding Modes
+- Switch to writing mode: `<leader>ws` → changes directory to `~/Documents/Writing`
+- Switch to coding mode: `<leader>wc` → changes directory to `~/repos`
+- Toggle file tree: `<leader>n`
 
-- Switch to writing mode: <leader>ws → changes directory to ~/Documents/Writing
-- Switch to coding mode: <leader>wc → changes directory to ~/repos
-- Toggle file tree: <leader>n
+### Writing & Build Commands
 
-### 🛠️ Writing & Build Commands
+This setup uses vim-dispatch to run compilation commands asynchronously in the background, preventing Neovim from freezing.  
 
-This setup uses vim-dispatch to run compilation commands asynchronously in the background, preventing Neovim from freezing.
-
-Details:
+Details:  
 
 - LaTeX (.tex): Uses a chained lualatex (x3) and biber workflow (defined in lua/utils/pandoc.lua) to correctly resolve citations. After successful compilation, all temporary build files (.aux, .log, .bbl, etc.) are automatically removed.
 - Markdown (.md): Uses a single pandoc command with the --citeproc and --pdf-engine=lualatex flags. The bibliography source must be specified in the YAML frontmatter of the Markdown file (e.g., bibliography: /path/to/my/library.bib).
 
-### 💡 Helpful Commands
+### Helpful Commands
 
-- Open Lazy plugin manager: `:Lazy`
-- Update plugins: `:Lazy update`
-- Synchronize plugin list: `:Lazy sync`
-- Format current file: `:ConformFormat`
-- Check plugin health: `:checkhealth`
-- Open Mason (Tool Manager): `:Mason`
+- Open Lazy plugin manager: `:Lazy`  
+- Update plugins: `:Lazy update`  
+- Synchronize plugin list: `:Lazy sync`  
+- Format current file: `:ConformFormat`  
+- Check plugin health: `:checkhealth`  
+- Open Mason (Tool Manager): `:Mason`  
 
-## 🔄 Updating Your Setup
+## Updating Your Setup
 
-1. Perform a Neovim update as described [here](#neovim-update).
-2. If it is not already up to date, your individual configuration can also be updated:
+1. Perform a Neovim update as described [here](#neovim-update).  
+2. If it is not already up to date, your individual configuration can also be updated:  
 
 ```bash
 cd ~/.config/nvim
 git pull
 ```
 
-1. Finally, start Neovim and perform a `:Lazy update`.
+1. Finally, start Neovim and perform a `:Lazy update`.  
 
 ### Plugin updates
 
 If you install new plugins or make changes to `~/.config/nvim/lua/plugins`, restart Neovim and perform a `:Lazy sync`.
 
-## 🔧 Tips
+## Tips
 
-1. Add new plugins under `lua/plugins/ `as separate files.
-2. Centralize global mappings in `lua/keymaps.lua`.
-3. If you create helpers (e.g., auto commands or formatters), put them in `lua/utils/`.
-4. Use Git branches for larger config changes, e.g. `git checkout -b refactor/lsp-setup`
+1. Add new plugins under `lua/plugins/ `as separate files.  
+2. Centralize global mappings in `lua/keymaps.lua`.  
+3. If you create helpers (e.g., auto commands or formatters), put them in `lua/utils/`.  
+4. Use Git branches for larger config changes, e.g. `git checkout -b refactor/lsp-setup`.  
 
-## 🧑‍💻 Developer Notes
+## Developer Notes
 
-To debug or reset your Neovim environment:
+To debug or reset your Neovim environment:  
 
 ```bash
 rm -rf ~/.local/share/nvim
@@ -255,9 +256,9 @@ rm -rf ~/.local/state/nvim
 nvim
 ```
 
-This will rebuild the Lazy environment from scratch.
+This will rebuild the Lazy environment from scratch.  
 
-### 🚨 Troubleshooting 
+### Troubleshooting 
 
 #### Corrupt Plugins/Submodules
 
@@ -285,6 +286,6 @@ If the AI chat fails to open with a YAML parser error, Neovim cannot find the co
 2. And that this path is added to the runtimepath: `vim.opt.runtimepath:append(vim.fn.stdpath("data") .. "/parsers")`.
 3. Run `:TSInstall! yaml markdown_inline` inside Neovim to force a fresh, correctly linked installation.
 
-## 👤 Author
+## Author
 
 Marcel
