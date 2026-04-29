@@ -23,6 +23,7 @@ Two dedicated work modes:
 ├── init.lua → Entry point (loads Lazy and your modules)
 ├── lua/
 |    ├──config/
+|         ├── ai_hardware.lua → Configuration according to hardware specs, e.g. number of context token  
 |         ├── format_setup.lua → Set formatting according to file type
 │         ├── keymaps.lua → Centralized keybindings
 |         ├── lint_setup.lua → Configure linter
