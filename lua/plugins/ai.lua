@@ -2,12 +2,21 @@
 
 local model_file = vim.fn.stdpath("data") .. "/codecompanion_model"
 
-local models = {
-  "qwen2.5-coder:7b",
-  "qwen2.5-coder:14b",
-  "qwen3.5:9b",
-  "deepseek-r1:8b",
-}
+local function get_ollama_models()
+  local handle = io.popen("ollama list | tail -n +2 | awk '{print $1}'")
+  if not handle then return { "qwen2.5-coder:7b" } end
+  local res = handle:read("*a")
+  handle:close()
+
+  local found_models = {}
+  for model in res:gmatch("[^\r\n]+") do
+    table.insert(found_models, model)
+  end
+
+  return #found_models > 0 and found_models or { "qwen2.5-coder:7b" }
+end
+
+local models = get_ollama_models()
 
 local function load_model()
   local f = io.open(model_file, "r")
