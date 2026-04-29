@@ -4,8 +4,8 @@ local lint = require("lint")
 -- 1. Helper for Zope context
 local function is_zope_file()
   local path = vim.api.nvim_buf_get_name(0)
-  -- Detect Zope via WebApp, localhost or /tmp/ paths
-  return path:match("WebApp") ~= nil or path:match("localhost") ~= nil or path:match("/tmp/") ~= nil
+  -- Detect Zope via PerFact, localhost or /tmp/ paths
+  return path:match("PerFact") ~= nil or path:match("localhost") ~= nil or path:match("/tmp/") ~= nil
 end
 
 -- 2. Arguments for ESLint (Lokal + Zope)
