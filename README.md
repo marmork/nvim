@@ -114,31 +114,78 @@ Start Neovim: `nvim`. Lazy.nvim will start automatically and begin downloading a
 
 To prevent the difference between Neovim and your individual configuration from becoming too large, you should update your Neovim installation every few weeks (at least every two months). This works as follows: Run `chmod +x update_nvim.sh` once and update with `./update_nvim.sh`. Then start Neovim and perform a `:Lazy update` to syncronize your plugins.  
 
-## AI & Local LLM Setup (Ollama)
+## Configuration
+### AI & Local LLM Setup (Ollama)
 
-This configuration uses **CodeCompanion.nvim** to talk to a local **Ollama** instance. This ensures your code stays private and works offline.  
+This configuration uses **CodeCompanion.nvim** to talk to a local **Ollama** instance.
 
-### 1. Hardware-Accelerated Hosting (AMD Ryzen APU)
+#### Ollama
+
+- Installation: `curl -fsSL https://ollama.com/install.sh | sh` 
+
+#### 1. Configuration for Dell XPS 9560 with NVIDIA GeForce GTX 1050
+
+```bash
+ollama pull qwen2.5-coder:7b
+ollama pull mistral-nemo
+```
+
+Add query and update function to Fish configuration:
+```bash
+alias qw='ollama run qwen2.5-coder:7b'
+alias mn='ollama run mistral-nemo:latest'
+
+function ask --description 'Ask Ollama'
+        set -l model_alias $argv[1]
+        set -l final_model "qwen2.5-coder:7b" # Default
+
+        switch $model_alias
+            case 'q' 'qw'
+                set final_model "qwen2.5-coder:7b"
+                set -e argv[1]
+            case 'm' 'mn'
+                set final_model "mistral-nemo:latest"
+                set -e argv[1]
+        end
+
+        if test (count $argv) -gt 0
+            echo "Using model: $final_model..."
+            # Important "$argv" in quotes in order to submit whole sentence
+            ollama run $final_model "$argv"
+        else
+            echo "Usage: ask [q|m] 'Frage'"
+        end
+    end
+
+    function ollama-update
+        set -l models qwen2.5-coder:7b mistral-nemo:latest
+        for model in $models
+            echo "Updating $model..."
+            ollama pull $model
+        end
+    end
+```
+
+#### 2. Configuration for Lenovo device with AMD Ryzen
 
 Optimized for **Ryzen 7 7730U** with Shared VRAM using the Vulkan-Bypass for stability.  
 
 **Setup Steps:**  
-
-1. Install Ollama: `curl -fsSL https://ollama.com/install.sh | sh`  
-2. Set Permissions:  
+ 
+1. Set Permissions:  
    ```bash
    sudo usermod -a -G video,render ollama
    sudo usermod -a -G video,render $USER
    ```
-3. Force Vulkan Mode (Systemd Override): `sudo systemctl edit ollama.service`  
-4. Add the following block:  
+2. Force Vulkan Mode (Systemd Override): `sudo systemctl edit ollama.service`  
+3. Add the following block:  
    ```ini
    [Service]
    Environment="OLLAMA_VULKAN=1"
    ```
-5. Restart service: `sudo systemctl daemon-reload && sudo systemctl restart ollama`  
+4. Restart service: `sudo systemctl daemon-reload && sudo systemctl restart ollama`  
 
-### 2. Recommended Models
+##### 2.1 Recommended Models
 
 ```bash
 ollama pull qwen2.5-coder:7b
@@ -147,7 +194,7 @@ ollama pull qwen3.5:9b
 ollama pull deepseek-r1:8b
 ```
 
-### 3. Shell integration (Fish)
+##### 2.2 Shell integration (Fish)
 
 Add these to your ~/.config/fish/config.fish for quick access:  
 
@@ -204,25 +251,24 @@ end
 - Switch to coding mode: `<leader>wc` → changes directory to `~/repos`
 - Toggle file tree: `<leader>n`
 
-### Writing & Build Commands
-
-This setup uses vim-dispatch to run compilation commands asynchronously in the background, preventing Neovim from freezing.  
-
-Details:  
-
-- LaTeX (.tex): Uses a chained lualatex (x3) and biber workflow (defined in lua/utils/pandoc.lua) to correctly resolve citations. After successful compilation, all temporary build files (.aux, .log, .bbl, etc.) are automatically removed.
-- Markdown (.md): Uses a single pandoc command with the --citeproc and --pdf-engine=lualatex flags. The bibliography source must be specified in the YAML frontmatter of the Markdown file (e.g., bibliography: /path/to/my/library.bib).
-
-### Helpful Commands
+### Commands
 
 - Open Lazy plugin manager: `:Lazy`  
 - Update plugins: `:Lazy update`  
 - Synchronize plugin list: `:Lazy sync`  
 - Format current file: `:ConformFormat`  
 - Check plugin health: `:checkhealth`  
-- Open Mason (Tool Manager): `:Mason`  
 
-## Updating Your Setup
+#### Writing & Build Commands
+
+This setup uses `vim-dispatch` to run compilation commands asynchronously in the background, preventing Neovim from freezing.  
+
+Details:  
+
+- LaTeX (.tex): Uses a chained lualatex (x3) and biber workflow (defined in lua/utils/pandoc.lua) to correctly resolve citations. After successful compilation, all temporary build files (.aux, .log, .bbl, etc.) are automatically removed.
+- Markdown (.md): Uses a single pandoc command with the --citeproc and --pdf-engine=lualatex flags. The bibliography source must be specified in the YAML frontmatter of the Markdown file (e.g., bibliography: /path/to/my/library.bib).
+
+## Update
 
 1. Perform a Neovim update as described [here](#neovim-update).  
 2. If it is not already up to date, your individual configuration can also be updated:  
@@ -232,20 +278,7 @@ cd ~/.config/nvim
 git pull
 ```
 
-1. Finally, start Neovim and perform a `:Lazy update`.  
-
-### Plugin updates
-
-If you install new plugins or make changes to `~/.config/nvim/lua/plugins`, restart Neovim and perform a `:Lazy sync`.
-
-## Tips
-
-1. Add new plugins under `lua/plugins/ `as separate files.  
-2. Centralize global mappings in `lua/keymaps.lua`.  
-3. If you create helpers (e.g., auto commands or formatters), put them in `lua/utils/`.  
-4. Use Git branches for larger config changes, e.g. `git checkout -b refactor/lsp-setup`.  
-
-## Developer Notes
+3. Finally, start Neovim and perform a `:Lazy update`.  
 
 To debug or reset your Neovim environment:  
 
@@ -285,7 +318,3 @@ If the AI chat fails to open with a YAML parser error, Neovim cannot find the co
    ```
 2. And that this path is added to the runtimepath: `vim.opt.runtimepath:append(vim.fn.stdpath("data") .. "/parsers")`.
 3. Run `:TSInstall! yaml markdown_inline` inside Neovim to force a fresh, correctly linked installation.
-
-## Author
-
-Marcel
