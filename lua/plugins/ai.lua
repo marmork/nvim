@@ -1,6 +1,9 @@
 -- ~/.config/nvim/lua/plugins/ai.lua
 
 local model_file = vim.fn.stdpath("data") .. "/codecompanion_model"
+local hardware = { num_ctx = 8192 } -- global fallback
+local ok, custom_hw = pcall(require, "config.ai_hardware")
+if ok then hardware = custom_hw end
 
 local function get_ollama_models()
   local handle = io.popen("ollama list | tail -n +2 | awk '{print $1}'")
@@ -138,7 +141,7 @@ return {
                   return current_model
                 end,
               },
-              num_ctx = { default = 24576 },
+              num_ctx = { default = hardware.num_ctx },
             },
           })
         end,
