@@ -82,6 +82,15 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("nvim-tree").setup({
+        -- Enable automatic reloading when files change on disk (e.g., git checkout)
+        auto_reload_on_write = true,
+        -- Ensure the tree root stays in sync with your current working directory
+        sync_root_with_cwd = true,
+        respect_buf_cwd = true,
+        update_focused_file = {
+          enable = true,
+          update_root = true,
+        },
         -- Actions configuration: Open file will quit nvim-tree and resize the window
         actions = { 
           open_file = { quit_on_open = true, resize_window = true } 
@@ -92,7 +101,29 @@ return {
         -- on_attach is left empty, as keymaps are defined globally in keymaps.lua
         on_attach = function() end,
         -- Renderer settings
-        renderer = { highlight_git = true },
+        renderer = { 
+          highlight_git = true,
+          -- Ensure git icons are shown even if highlight is on
+          icons = {
+            show = {
+              git = true,
+            },
+          },
+        },
+        git = {
+          enable = true,
+          timeout = 500,
+        },
+      })
+
+      -- Autocommand to refresh the tree whenever you switch back to Neovim
+      -- This ensures that if you changed the branch in an external terminal or ToggleTerm,
+      -- the tree updates as soon as you focus Neovim again.
+      vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
+        callback = function()
+          require("nvim-tree.api").tree.reload()
+        end,
+        group = vim.api.nvim_create_augroup("NvimTreeGitRefresh", { clear = true }),
       })
 
       -- Adding the autocommand to automatically update nvim-tree when cd
