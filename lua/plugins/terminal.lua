@@ -3,8 +3,8 @@ return {
     version = "*",
     -- We define the keys here so lazy.nvim registers them immediately
     keys = {
-      -- Shortcut to toggle the terminal (Ctrl + t)
-      { "<C-t>", "<cmd>ToggleTerm<cr>", desc = "Toggle Terminal" },
+      -- Shortcut to toggle the terminal
+      { "<leader>t", "<cmd>ToggleTerm<cr>", desc = "Toggle Terminal" },
       -- Optional: Leader shortcut as a backup
       { "<leader>tt", "<cmd>ToggleTerm<cr>", desc = "Toggle Terminal (Leader)" },
     },
@@ -19,6 +19,32 @@ return {
         persist_size = true,
         close_on_exit = true,
         shell = vim.o.shell,
+      })
+
+      -- Auto-Insert mode when entering Terminal; this ensures you can type immediately when you switch back to the terminal
+      vim.api.nvim_create_autocmd({ "TermEnter", "BufEnter" }, {
+        pattern = "term://*",
+        callback = function()
+          vim.cmd("startinsert")
+        end,
+      })
+
+      -- Dynamic refresh and cwd sync; 
+      vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "TermLeave" }, {
+        callback = function()
+          -- Sync Neovim's CWD to the current working directory
+          -- This helps nvim-tree to stay in sync even if you 'cd' in the terminal
+          if vim.bo.buftype == "" then
+              vim.api.nvim_command("silent! cd .")
+          end
+
+          local ok, nvimtree_api = pcall(require, "nvim-tree.api")
+          if ok then
+            -- We force a root change to current directory and then reload
+            nvimtree_api.tree.change_root(vim.fn.getcwd())
+            nvimtree_api.tree.reload()
+          end
+        end,
       })
 
       -- Terminal-only mappings
