@@ -7,6 +7,48 @@ return {
       { "<leader>t", "<cmd>ToggleTerm<cr>", desc = "Toggle Terminal" },
       -- Optional: Leader shortcut as a backup
       { "<leader>tt", "<cmd>ToggleTerm<cr>", desc = "Toggle Terminal (Leader)" },
+      {
+        "<leader>ac",
+        function()
+          local ok, paths = pcall(require, "config.local_paths")
+          local is_work = os.getenv("NVIM_MODE") == "work"
+
+          if not is_work then
+            vim.notify("Claude Sandbox is only available in 'work' mode.", vim.log.levels.WARN, { title = "Claude" })
+            return
+          end
+
+          if not ok or not paths.claude_sandbox_path then
+            vim.notify("Claude sandbox path not found in local_paths.lua", vim.log.levels.ERROR)
+            return
+          end
+
+          -- Construct the command
+          -- We use -f to point to the specific compose file and run the 'claude' service
+          local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+          local claude_cmd = string.format(
+            "docker compose -f %s/docker-compose.yaml run --rm --workdir /workspace/%s claude",
+            vim.fn.expand(paths.claude_sandbox_path),
+            project_name
+          )
+
+          local Terminal = require("toggleterm.terminal").Terminal
+          local claude_term = Terminal:new({
+            cmd = claude_cmd,
+            direction = "float",
+            close_on_exit = false,
+            float_opts = {
+              border = "double",
+            },
+            -- Refresh buffers after Claude might have changed them
+            on_close = function()
+              vim.cmd("checktime")
+            end,
+          })
+          claude_term:toggle()
+        end,
+        desc = "Toggle Claude Sandbox",
+      }
     },
     config = function()
       require("toggleterm").setup({
