@@ -23,20 +23,42 @@ return {
             return
           end
 
+          local current_file = vim.fn.expand("%:p")
+          local sandbox_dir = vim.fn.expand(paths.claude_sandbox_path)
+          local extra_args = ""
+          local workdir = ""
+
+          -- Logic for Zope /tmp files (nvr)
+          if current_file:match("^/tmp/") then
+            -- Extract the specific folder, e.g., /tmp/tmp3vyebn12
+            local tmp_folder = current_file:match("(/tmp/tmp[^/]+)")
+            if tmp_folder then
+              -- Surgically mount only this specific temp folder
+              extra_args = string.format("-v %s:%s:rw", tmp_folder, tmp_folder)
+              workdir = vim.fn.expand("%:p:h")
+            end
+          else
+            -- Standard Logic for projects in ~/repos
+            local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+            workdir = "/workspace/" .. project_name
+          end
+
           -- Construct the command
-          -- We use -f to point to the specific compose file and run the 'claude' service
-          local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+          -- 1. Use -f for the correct compose file
+          -- 2. Add extra_args for dynamic /tmp mounting
+          -- 3. End with 'claude' to start the tool immediately
           local claude_cmd = string.format(
-            "docker compose -f %s/docker-compose.yaml run --rm --workdir /workspace/%s claude",
-            vim.fn.expand(paths.claude_sandbox_path),
-            project_name
+            "docker compose -f %s/docker-compose.yaml run --rm %s --workdir %s claude claude",
+            sandbox_dir,
+            extra_args,
+            workdir
           )
 
           local Terminal = require("toggleterm.terminal").Terminal
           local claude_term = Terminal:new({
             cmd = claude_cmd,
             direction = "float",
-            close_on_exit = false,
+            close_on_exit = true,
             float_opts = {
               border = "double",
             },
