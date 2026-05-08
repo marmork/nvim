@@ -7,7 +7,11 @@ return {
       "<leader>ac",
       function()
         if _claude_term then
-          _claude_term:toggle()
+          if _claude_term:is_open() then
+            _claude_term:close()
+          else
+            _claude_term:open()
+          end
           return
         end
 
@@ -58,7 +62,9 @@ return {
           close_on_exit = true,
           float_opts = { border = "double" },
           on_open = function(term)
-            vim.api.nvim_buf_set_keymap(term.bufnr, "t", "<C-t>", [[<C-\><C-n><cmd>close<CR>]], {noremap = true, silent = true})
+            local opts = { noremap = true, silent = true }
+            vim.api.nvim_buf_set_keymap(term.bufnr, "t", "<leader>ac", [[<C-\><C-n><cmd>close<CR>]], opts)
+            vim.api.nvim_buf_set_keymap(term.bufnr, "t", "<C-t>", [[<C-\><C-n><cmd>close<CR>]], opts)
           end,
           on_exit = function()
             _claude_term = nil
@@ -67,7 +73,7 @@ return {
             vim.cmd("checktime")
           end,
         })
-        _claude_term:toggle()
+        _claude_term:open()
       end,
       desc = "Claude Sandbox",
     },
